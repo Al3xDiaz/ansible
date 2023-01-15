@@ -1,0 +1,12 @@
+# Desciption of the Ansible playbook
+---
+- name: testing include
+  hosts: all
+
+  tasks:
+  - name: include all others tasks
+    include_tasks:
+      file: "tasks/test.yml"
+    vars:
+      msg: "{{ ansible_user_id }}"
+...

@@ -4,14 +4,15 @@
 #### Note: you must replace the variables with the values ​​of your servers
 
 ```bash
-# SERVER_HOST= IP public,IP private, domain or sub-domain
-# SERVER_USER= user for login in server
-# SERVER_NAME= identifier by server i playbooks
-echo "SERVER_HOST=$(hostname -I | awk '{print $1}')
-SERVER_USER=$USER
-SERVER_NAME=localhost
-GIT_NAME=YOUR_NAME
-GIT_EMAIL=YOUR_EMAIL" > .env
+echo -e "[all]
+$(hostname -I | awk '{print $1}') ansible_user=$USER server_ssh_key_passphrasse=\"\"\n
+[localhost]
+$(hostname -I | awk '{print $1}') ansible_user=$USER server_ssh_key_passphrasse=\"\"\n
+[all:vars]
+git_name=johndoo git_email=john@doo.es\n
+
+[personal:children]
+localhost" > ./ansible/inventory
 ```
 
 ## Build image
@@ -20,39 +21,40 @@ GIT_EMAIL=YOUR_EMAIL" > .env
 docker-compose build
 ```
 
-## Copy identity file 
+## Test Playbooks
 
 ```bash
-# Note: don't execute this script with handy cany extension, it will be executed with terminal
-docker-compose run --rm ansible
-
+docker-compose up
 ```
 
-## Ping all host
-#### Note: if ping is UNREACHABLE! or Failed to connect to...
-#### copy content by ./ansible/ssh-keys/ansible.pub in file ~/.ssh/authorized_keys in your server.
 
-```bash
-docker-compose run  --rm --entrypoint ansible ansible all --key-file ssh-keys/ansible -m ping 
-```
 
 ## Commands available
-### list all hosts
+
 
 ```bash
+### Ping all host
+# Note: if ping is UNREACHABLE! or Failed to connect to...
+# copy content by ./ansible/ssh-keys/ansible.pub in file ~/.ssh/authorized_keys in your server.
+docker-compose run  --rm ansible ansible all -m ping
+```
+
+```bash
+# Copy identity file 
+# Note: you can replace "node-`hostname -I | awk '{print $1}'`" for your $HOST_NAME or $IP_ADDRESS
+docker-compose run --rm ansible ssh-copy-id -i /root/.ssh/ansible node-`hostname -I | awk '{print $1}'`
+```
+
+```bash
+#list all hosts
 docker-compose run --rm ansible ansible all --list-hosts
 ```
 
-## IN Container
+## link tmuxconfig to host
 
 ```bash
-# %%
-#docker-compose run --rm ansible bash
-# alias available:
-sh ansible/alias.sh
-
-## Ansible Flags
-# -ask-become-pass #require server password
-# --tags #exec one task by tag
-# -i $inventoryfilepath #specify the path of the inventoriFle
+rm ~/.tmux.*
+ln -s `pwd`/ansible/files/.tmux.conf ~/.tmux.conf
+ln -s `pwd`/ansible/files/.tmux.git.conf ~/.tmux.git.conf
+tmux source-file ~/.tmux.conf
 ```

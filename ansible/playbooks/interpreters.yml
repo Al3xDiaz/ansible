@@ -1,9 +1,8 @@
 # Desciption of the Ansible playbook
 ---
 - name: install tools interpreters
-  hosts: localhost
+  hosts: all
   become: true # true to become root
-  gather_facts: no
 
   tasks:
   # update
@@ -28,7 +27,6 @@
       - python
     apt:
       pkg:
-        - git
         - curl
         - wget
   
@@ -50,4 +48,5 @@
         export GOPATH=\$HOME/go
         export GOBIN=\$GOPATH/bin
         export GOROOT=/usr/local/go
-        export PATH=\$PATH:\$GOBIN:\$GOROOT/bin" >> /home/{{ hostvars[inventory_hostname].ansible_user }}/.bashrc
+        export PATH=\$PATH:\$GOBIN:\$GOROOT/bin" >> /{{ ansible_user_id }}/.bashrc
+...

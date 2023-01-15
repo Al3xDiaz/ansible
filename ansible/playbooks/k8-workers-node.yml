@@ -5,7 +5,13 @@
   become: true # true to become root
 
   tasks:
+  - name: copy command.sh
+    ansible.builtin.copy:
+      src: /root/ansible/outputs/command.sh
+      dest: /tmp/command.sh
+      owner: "{{ ansible_user_id }}"
+      group: "{{ ansible_user_id }}"
+      mode: 'u=rwx,g=rx,o=rx'
   - name: Cluster join command
-    shell: |
-       
-       
+    command: sh /tmp/command.sh
+...

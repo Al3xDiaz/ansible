@@ -1,16 +1,9 @@
-FROM ubuntu:20.04
+FROM alpine:3.16.2
 USER root
-WORKDIR /home/ansible/
-RUN usermod -s '/bin/bash' root
-RUN apt update && apt install -y python3 ansible openssh-client
-RUN mkdir /root/.ssh
-
-RUN echo "Host *\n\tStrictHostKeyChecking no\n\tUserKnownHostsFile=/dev/null" > /root/.ssh/config
+WORKDIR /root/ansible
+RUN apk add ansible=5.8.0-r0 openssh-client=9.0_p1-r2
 COPY  ["./ansible/","."]
-
-COPY ./setup.sh .
-RUN cat alias.sh >> ~/.bashrc
+RUN ln -s /root/ansible.cfg /root/ansible.cfg
+RUN chmod +x ansible-test.sh
 RUN chmod +x setup.sh
-ENTRYPOINT [ "sh","setup.sh" ]
-# CMD [ "ansible","all","--key-file","ssh-keys/ansible","-m","ping"]
-CMD [ "ssh-copy-id","-i","ssh-keys/ansible","$SERVER_USER@$SERVER_NAME","<<<" ,"$SSH_KEY_PASSPHRASE" ]
+ENTRYPOINT [ "./setup.sh" ]

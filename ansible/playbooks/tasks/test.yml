@@ -1,0 +1,6 @@
+---
+# test include others playbook
+# args: msg
+- debug:
+    msg: "user is {{ msg }}"
+...

@@ -1,0 +1,62 @@
+alias ll='ls -l'
+alias la='ls -lA'
+alias l='ls -CF'
+alias open=xdg-open
+
+greset() {
+    git reset --hard HEAD~$1
+}
+#GIT
+gcommit() {
+    git fetch
+    #do things with parameters like $1 such as
+    git branch
+    git add .
+    git status
+    git commit -m "$1"  
+}
+gcfeat(){
+    gcommit "[feat] $@"
+}
+gcfix(){
+    gcommit "[fix] $@"
+}
+gcupdate(){
+    gcommit "[update] $@"
+}
+gcrefactor(){
+    gcommit "[refactor] $@"
+}
+
+gpush(){
+    gcommit "$1" && git fetch && git push
+}
+alias pull="git pull"
+alias gfetch="git fetch"
+alias gmerge="git merge"
+alias gbranch="git branch"
+alias newbranch="git checkout -b"
+tcommit() {
+    sh ./test.sh && gcommit "$1"
+}
+tpush(){
+    tcommit "$1" && git fetch && git push --all
+}
+gstash(){
+    git add .
+    git stash $@
+}
+gtag(){
+    [[ "$@" == "" ]] && git tag || git tag -a $1 -m "$2" && git push origin --tags
+}
+#DOCKER
+alias dimages="docker images"
+alias dps="docker ps"
+alias dpsa="docker ps -a"
+alias dprune="docker system prune -af"
+ipv4(){
+    hostname -I | awk '{print $1}'
+}
+alias grep="grep --color"
+# print neofetch
+[[  "$TERM_PROGRAM" != "vscode" ]] && neofetch

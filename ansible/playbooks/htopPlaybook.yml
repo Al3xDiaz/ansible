@@ -1,4 +1,4 @@
-# Desciption of the Ansible playbook
+#Desciption of the Ansible playbook
 ---
 - name: install tools
   hosts: all
@@ -8,3 +8,4 @@
   - name: Simple install task htop
     apt:
       name: htop
+...
