@@ -27,10 +27,7 @@ docker-compose build
 docker-compose up
 ```
 
-
-
 ## Commands available
-
 
 ```bash
 ### Ping all host
@@ -48,6 +45,53 @@ docker-compose run --rm ansible ssh-copy-id -i /root/.ssh/ansible node-`hostname
 ```bash
 #list all hosts
 docker-compose run --rm ansible ansible all --list-hosts
+```
+
+## Run playbooks
+
+```bash
+#test
+docker-compose run --rm ansible ansible-playbook playbooks/configSystem.yml --ask-become-pass
+```
+```bash
+#test
+docker-compose run --rm ansible ansible-playbook playbooks/devtools.yml --ask-become-pass
+```
+```bash
+#test
+docker-compose run --rm ansible ansible-playbook playbooks/docker.yml --ask-become-pass
+```
+```bash
+#test
+docker-compose run --rm ansible ansible-playbook playbooks/htopPlaybook.yml --ask-become-pass
+```
+```bash
+#test
+docker-compose run --rm ansible ansible-playbook playbooks/interface.yml --ask-become-pass
+```
+```bash
+#test
+docker-compose run --rm ansible ansible-playbook playbooks/interpreters.yml --ask-become-pass
+```
+```bash
+#test
+docker-compose run --rm ansible ansible-playbook playbooks/k8-master-node.yml --ask-become-pass
+```
+```bash
+#test
+docker-compose run --rm ansible ansible-playbook playbooks/k8-nodes.yml --ask-become-pass
+```
+```bash
+#test
+docker-compose run --rm ansible ansible-playbook playbooks/k8-workers-node.yml --ask-become-pass
+```
+```bash
+#test
+docker-compose run --rm ansible ansible-playbook playbooks/nginx.yml --ask-become-pass
+```
+```bash
+#test
+docker-compose run --rm ansible ansible-playbook playbooks/testInclude.yml --ask-become-pass
 ```
 
 ## link tmuxconfig to host
