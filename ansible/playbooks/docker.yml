@@ -5,21 +5,15 @@
   become: true # true to become root
 
   tasks:
-  - name: Remove TIG
-    apt:
-      pkg: 
-        - docker
-        - docker-engine
-        - docker.io
-        - containerd
-        - runc
-      state: absent
 # update
   - name: "Update Repository cache"
     apt:
       update_cache: true
       cache_valid_time: 3600
       force_apt_get: true
+    when:
+      - ansible_facts['distribution'] == "Debian"
+
   - name: Install git
     include_tasks: "{{ playbook_dir }}/tasks/git.yml"
 
@@ -33,21 +27,35 @@
       - curl
       - gnupg
       - lsb-release
+    when:
+      - ansible_facts['distribution'] == "Debian"
 #step 2
   - name: Add Docker’s official GPG key
     shell: |
         rm -f /usr/share/keyrings/docker-archive-keyring.gpg
         curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
         echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    args:
+      creates: /usr/bin/docker
+    when:
+      - ansible_facts['distribution'] == "Debian"
 # Install Docker Engine
   - name: Install docker-ce
     shell: |
         apt-get update
         apt-get install docker-ce docker-ce-cli containerd.io -y
+    args:
+      creates: /usr/bin/docker
+    when:
+      - ansible_facts['distribution'] == "Debian"
 # docker compose  
   - name: Install docker compose
+    tags:
+      - docker-compose
     shell: |
         curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
         chmod +x /usr/local/bin/docker-compose
         ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
         usermod -a -G docker $USER
+    args:
+      creates: /usr/bin/docker-compose

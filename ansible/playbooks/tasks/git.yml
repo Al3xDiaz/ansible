@@ -8,3 +8,5 @@
     git config --global user.email "{{ git_email }}"
     git config --global user.name "{{ git_name }}"
     git config --global pull.ff only
+  when:
+    - ansible_facts['distribution'] == "Debian"
