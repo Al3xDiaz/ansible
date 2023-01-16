@@ -1,7 +1,7 @@
 # Desciption of the Ansible playbook
 ---
 - name: install kubeadmin
-  hosts: nodes
+  hosts: master,worker
   become: true # true to become root
 
   tasks:
