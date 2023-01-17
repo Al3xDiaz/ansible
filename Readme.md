@@ -4,15 +4,30 @@
 #### Note: you must replace the variables with the values ​​of your servers
 
 ```bash
+# create basic inventory
+cat ansible/inventory && exit
 echo -e "[all]
-$(hostname -I | awk '{print $1}') ansible_user=$USER server_ssh_key_passphrasse=\"\"\n
+$(hostname -I | awk '{print $1}') ansible_user=$USER server_ssh_key_passphrasse=\"\"
 [localhost]
-$(hostname -I | awk '{print $1}') ansible_user=$USER server_ssh_key_passphrasse=\"\"\n
+$(hostname -I | awk '{print $1}') ansible_user=$USER server_ssh_key_passphrasse=\"\"
 [all:vars]
-git_name=johndoo git_email=john@doo.es\n
-
+ansible_sudo_pass=\"\"
+git_name=johndoo 
+git_email=john@doo.es
 [personal:children]
 localhost" > ./ansible/inventory
+```
+
+```bash
+#create basic variables.yml
+echo 'write your git name:'
+read git_name
+echo 'write your git email:'
+read git_email
+
+echo "git_name: $git_name
+git_email: $git_email" > ./ansible/vars/variables.yml
+
 ```
 
 ## Build image
@@ -56,17 +71,17 @@ docker-compose run --rm ansible ansible-playbook playbooks/configSystem.yml
 
 ```bash
 #test
-docker-compose run --rm ansible ansible-playbook playbooks/devtools.yml --ask-become-pass
+docker-compose run --rm ansible ansible-playbook playbooks/devtools.yml
 ```
 
 ```bash
 #test
-docker-compose run --rm ansible ansible-playbook playbooks/docker.yml --ask-become-pass
+docker-compose run --rm ansible ansible-playbook playbooks/docker.yml
 ```
 
 ```bash
 #test
-docker-compose run --rm ansible ansible-playbook playbooks/htopPlaybook.yml --ask-become-pass
+docker-compose run --rm ansible ansible-playbook playbooks/htopPlaybook.yml
 ```
 
 ```bash
@@ -76,27 +91,27 @@ docker-compose run --rm ansible ansible-playbook playbooks/interface.yml
 
 ```bash
 #test
-docker-compose run --rm ansible ansible-playbook playbooks/interpreters.yml --ask-become-pass
+docker-compose run --rm ansible ansible-playbook playbooks/interpreters.yml
 ```
 
 ```bash
 #test
-docker-compose run --rm ansible ansible-playbook playbooks/k8-master-node.yml --ask-become-pass
+docker-compose run --rm ansible ansible-playbook playbooks/k8-master-node.yml
 ```
 
 ```bash
 #test
-docker-compose run --rm ansible ansible-playbook playbooks/k8-nodes.yml --ask-become-pass
+docker-compose run --rm ansible ansible-playbook playbooks/k8-nodes.yml
 ```
 
 ```bash
 #test
-docker-compose run --rm ansible ansible-playbook playbooks/k8-workers-node.yml --ask-become-pass
+docker-compose run --rm ansible ansible-playbook playbooks/k8-workers-node.yml
 ```
 
 ```bash
 #test
-docker-compose run --rm ansible ansible-playbook playbooks/nginx.yml --ask-become-pass
+docker-compose run --rm ansible ansible-playbook playbooks/nginx.yml
 ```
 
 ```bash

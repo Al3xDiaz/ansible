@@ -3,7 +3,6 @@
 - name: install tools
   hosts: all
   become: true # true to become root
-
   tasks:
 # update
   - name: "Update Repository cache"
@@ -13,8 +12,7 @@
       force_apt_get: true
     when:
       - ansible_facts['distribution'] == "Debian"
-
-  - name: Install git
+  - name: git    
     include_tasks: "{{ playbook_dir }}/tasks/git.yml"
 
 # install Docker
