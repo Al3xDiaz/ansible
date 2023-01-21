@@ -18,18 +18,6 @@ git_email=john@doo.es
 localhost" > ./ansible/inventory
 ```
 
-```bash
-#create basic variables.yml
-echo 'write your git name:'
-read git_name
-echo 'write your git email:'
-read git_email
-
-echo "git_name: $git_name
-git_email: $git_email" > ./ansible/vars/variables.yml
-
-```
-
 ## Build image
 
 ```bash
