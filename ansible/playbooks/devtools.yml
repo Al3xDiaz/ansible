@@ -30,7 +30,8 @@
         - software-properties-common
         - gnupg
         - tmux
-
+        - xclip
+        - neofetch
 #set vim as default editor.
   - name: set vim as default editor
     shell: "update-alternatives --set editor /usr/bin/vim.basic"
@@ -71,10 +72,12 @@
       creates: /usr/bin/Postman/Postman
 
   - name: "alias postman"
-    shell: |
-      echo 'export PATH="$PATH:/usr/bin/Postman"' >> ~/.bashrc
-    args:
-      creates: /usr/bin/Postman/Postman
+    ansible.builtin.lineinfile:
+      path: ~/.bashrc
+      regexp: "^export.*Postman"      
+      line: 'export PATH="$PATH:/usr/bin/Postman"' 
+      create: true
+      state: present
     become: false
     become_user: "{{ ansible_user_id }}"
 

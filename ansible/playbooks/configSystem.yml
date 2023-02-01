@@ -1,56 +1,83 @@
 # Desciption of the Ansible playbook
 ---
 - name: install tools
-  hosts: all
+  hosts: localhost
   become: false
 # true to become root
 
   tasks:
 #  config tmux
   - name: "Config tmux"
-    tags:
-      - tmux
-    copy: 
+    copy:
       src: '{{item}}'
       dest: '/home/{{ansible_user_id}}/'
       mode: '0644'
     loop:
       - /root/ansible/files/.tmux.conf
       - /root/ansible/files/.tmux.git.conf
+    register: tmux_copy_files
 #reload tmux
   - name: reload tmux
-    tags:
-      - tmux
-    shell: "tmux source-file ~/.tmux.conf"
+    shell: |
+      tmux new source-file ~/.tmux.conf
+    when: tmux_copy_files.changed
 # config ssh
   - name: "copy ssh config"
-    tags:
-      - ssh
     ansible.builtin.copy:
       src: /root/ansible/files/ssh.config
       dest: ~/.ssh/config
       mode: 0664 # 0644
+# generate GPG key
+  - name: "generate GPG key"
+    shell: |
+      gpg --batch --gen-key <<EOF
+      Key-Type: 1
+      Key-Length: 4086
+      Subkey-Type: 1
+      Subkey-Length: 2048
+      Name-Real: {{ git_name }}
+      Name-Email: {{ git_email }}
+      Passphrase: {{ server_gpg_passphrasse }}
+      Expire-Date: 1y
+      EOF
+      mkdir -p ~/.gpg/
+      gpg --armor --export {{ git_email }} > ~/.gpg/public_key_{{ git_name }}.txt
+      git config --global user.signinkey {{ git_email }}
+      git config --global gpg.program gpg
+    args:
+      creates: ~/.gpg/public_key_{{ git_name }}.txt
+
+
+#configure git
+  - name: git    
+    include_tasks: "{{ playbook_dir }}/tasks/git.yml"
+
 # generete ssh-keys
   - name: "generate ssh key"
     ansible.builtin.user:
-      name: "{{ hostvars[inventory_hostname].git_email }}"
+      name: "{{ git_email }}"
       generate_ssh_key: yes
       ssh_key_bits: 3072
-      ssh_key_file: ".ssh/id_{{ hostvars[inventory_hostname].git_user }}"
-      ssh_key_passphrase: "{{hostvars[inventory_hostname].server_ssh_key_passphrasse}}"
+      ssh_key_file: ".ssh/id_{{ git_name }}"
+      ssh_key_passphrase: "{{ server_ssh_key_passphrasse }}"
 
 #set .bashrc
+  - name: change .bashrc
+    ansible.builtin.lineinfile:
+      path: ~/.bashrc
+      regexp: '\[\[ -f ~/.bash_aliases \]\]'
+      line: "[[ -f ~/.bash_aliases ]] && . ~/.bash_aliases"
+      create: true
+      state: present
   - name: aliases
     copy:
-      src: '/root/ansible/files/.bashrc'
-      dest: '/home/{{ ansible_user_id }}/.bashrc'
+      src: '/root/ansible/files/.bash_aliases'
+      dest: '~/.bash_aliases'
       mode: 0644
 #set keyboard shotcuts
 #note: find schemas in /usr/share/glib-2.0/schemas or:
 #gsettings list-recursively | egrep "Alt|Shift|Super|Space|Win|Meta|Primary|Control|Ctrl|Tab" | grep org.gnome | awk '{print $1}' | sort -u
   - name: system shortcuts
-    tags:
-      - shortcuts
     shell: |
       #set open file explorer with gsettings
       gsettings set org.gnome.settings-daemon.plugins.media-keys home "['<Super>e']"
@@ -62,8 +89,6 @@
       #set switch group with gsettings
       set org.gnome.desktop.wm.keybindings switch-group "['<Super>Tab']"
   - name: custom shortcuts
-    tags: 
-      - shortcuts
     shell: |
       BEGINNING="gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings"
 
@@ -71,7 +96,7 @@
 
       gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings \
       "['$KEY_PATH/custom0/']"
-  
+
       $BEGINNING/custom0/ name "Launch tmux with gnome-terminal"
       $BEGINNING/custom0/ command 'gnome-terminal -e "tmux -L system"'
       $BEGINNING/custom0/ binding '<Super>grave'

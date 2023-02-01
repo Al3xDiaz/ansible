@@ -7,9 +7,9 @@
 # create basic inventory
 cat ansible/inventory && exit
 echo -e "[all]
-$(hostname -I | awk '{print $1}') ansible_user=$USER server_ssh_key_passphrasse=\"\"
+$(hostname -I | awk '{print $1}') ansible_user=$USER server_ssh_key_passphrasse=\"\" server_gpg_passphrasse=\"\"
 [localhost]
-$(hostname -I | awk '{print $1}') ansible_user=$USER server_ssh_key_passphrasse=\"\"
+$(hostname -I | awk '{print $1}') ansible_user=$USER server_ssh_key_passphrasse=\"\" server_gpg_passphrasse=\"\"
 [all:vars]
 ansible_sudo_pass=\"\"
 git_name=johndoo 
@@ -59,7 +59,7 @@ docker-compose run --rm ansible ansible-playbook playbooks/configSystem.yml
 
 ```bash
 #test
-docker-compose run --rm ansible ansible-playbook playbooks/devtools.yml
+docker-compose run --rm ansible ansible-playbook playbooks/devtools.yml --tag allways
 ```
 
 ```bash
@@ -107,11 +107,59 @@ docker-compose run --rm ansible ansible-playbook playbooks/nginx.yml
 docker-compose run --rm ansible ansible-playbook playbooks/testInclude.yml
 ```
 
-## link tmuxconfig to host
+## link config files to host
 
 ```bash
 rm ~/.tmux.*
+rm ~/.bash_aliases
 ln -s `pwd`/ansible/files/.tmux.conf ~/.tmux.conf
 ln -s `pwd`/ansible/files/.tmux.git.conf ~/.tmux.git.conf
-tmux source-file ~/.tmux.conf
+ln -s `pwd`/ansible/files/.bash_aliases ~/.bash_aliases
+tmux new source-file ~/.tmux.conf
+```
+
+### Generate GPG key
+
+```bash
+EMAIL=$(git config --global user.email)
+
+echo "writte your email [$EMAIL]]"
+read YOUR_EMAIL
+[[ "$YOUR_EMAIL" == "" ]] && YOUR_EMAIL=$EMAIL
+
+echo "writte your password for gpg key:"
+read PASSPHRASE
+
+#Generate key
+gpg --batch --gen-key <<EOF
+Key-Type: 1
+Key-Length: 4086
+Subkey-Type: 1
+Subkey-Length: 2048
+Name-Real: $(git config --global user.name)
+Name-Email: $YOUR_EMAIL
+Passphrase: $PASSPHRASE
+Expire-Date: 1y
+EOF
+
+gpg --list-secret-keys --keyid-format LONG $YOUR_EMAIL
+
+#Export key
+KEY_ID=$YOUR_EMAIL
+gpg --armor --export $KEY_ID
+
+
+```
+
+#### configure key
+
+```bash
+EMAIL=$(git config --global user.email)
+
+echo "writte your email [$EMAIL]]"
+read YOUR_EMAIL
+[[ "$YOUR_EMAIL" == "" ]] && YOUR_EMAIL=$EMAIL
+
+git config --global user.signinkey $KEY_ID
+git config --global gpg.program gpg
 ```
