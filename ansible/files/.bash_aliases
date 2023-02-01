@@ -44,7 +44,7 @@ gcommit() {
     git branch
     git add --all
     git status
-    git commit -m '$@'
+    git commit -m "$*"
     COMMITS=$(git cherry -v | wc -l || echo 0)
     read -p "do you want to push ($COMMITS) commit(s)? (y\N):" PUSH
     [[ ${PUSH^} == "Y" ]] && git push origin --all
