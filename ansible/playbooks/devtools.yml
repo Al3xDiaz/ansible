@@ -88,6 +88,8 @@
       owner: "{{ ansible_user_id }}"
       group: "{{ ansible_user_id }}"
       mode: 0644
+    args:
+      creates: /usr/share/applications/Postman.desktop
  
   - name: Remove the installer
     file: 

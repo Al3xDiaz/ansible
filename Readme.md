@@ -50,6 +50,10 @@ docker-compose run --rm ansible ssh-copy-id -i /root/.ssh/ansible node-`hostname
 docker-compose run --rm ansible ansible all --list-hosts
 ```
 
+```bash
+docker-compose run --rm ansible sh
+```
+
 ## Run playbooks
 
 ```bash
@@ -59,7 +63,7 @@ docker-compose run --rm ansible ansible-playbook playbooks/configSystem.yml
 
 ```bash
 #test
-docker-compose run --rm ansible ansible-playbook playbooks/devtools.yml --tag allways
+docker-compose run --rm ansible ansible-playbook playbooks/devtools.yml
 ```
 
 ```bash

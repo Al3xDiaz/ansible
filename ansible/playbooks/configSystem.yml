@@ -1,7 +1,7 @@
 # Desciption of the Ansible playbook
 ---
 - name: install tools
-  hosts: localhost
+  hosts: all
   become: false
 # true to become root
 
@@ -14,7 +14,7 @@
       mode: '0644'
     loop:
       - /root/ansible/files/.tmux.conf
-      - /root/ansible/files/.tmux.git.conf
+      # - /root/ansible/files/.tmux.git.conf
     register: tmux_copy_files
 #reload tmux
   - name: reload tmux
@@ -55,20 +55,20 @@
 # generete ssh-keys
   - name: "generate ssh key"
     ansible.builtin.user:
-      name: "{{ git_email }}"
+      name: "{{ ansible_user }}"
       generate_ssh_key: yes
       ssh_key_bits: 3072
       ssh_key_file: ".ssh/id_{{ git_name }}"
       ssh_key_passphrase: "{{ server_ssh_key_passphrasse }}"
 
 #set .bashrc
-  - name: change .bashrc
-    ansible.builtin.lineinfile:
-      path: ~/.bashrc
-      regexp: '\[\[ -f ~/.bash_aliases \]\]'
-      line: "[[ -f ~/.bash_aliases ]] && . ~/.bash_aliases"
-      create: true
-      state: present
+  # - name: change .bashrc
+  #   ansible.builtin.lineinfile:
+  #     path: ~/.bashrc
+  #     regexp: '\[\[ -f ~/.bash_aliases \]\]'
+  #     line: "[[ -f ~/.bash_aliases ]] && . ~/.bash_aliases"
+  #     create: true
+  #     state: present
   - name: aliases
     copy:
       src: '/root/ansible/files/.bash_aliases'
@@ -88,16 +88,23 @@
       gsettings set org.gnome.desktop.wm.keybindings switch-applications "['<Alt>Tab']"
       #set switch group with gsettings
       set org.gnome.desktop.wm.keybindings switch-group "['<Super>Tab']"
+  
+  - name: Register gnome-shell installation status
+    command: which gnome-shell
+    changed_when: false
+    failed_when: false
+    register: gnome_shell_installed
+
   - name: custom shortcuts
     shell: |
       BEGINNING="gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings"
 
       KEY_PATH="/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings"
 
-      gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings \
-      "['$KEY_PATH/custom0/']"
+      gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "['$KEY_PATH/custom0/']"
 
-      $BEGINNING/custom0/ name "Launch tmux with gnome-terminal"
-      $BEGINNING/custom0/ command 'gnome-terminal -e "tmux -L system"'
+      $BEGINNING/custom0/ name "Launch tmux with  x-terminal-emulator"
+      $BEGINNING/custom0/ command ' x-terminal-emulator -e "tmux -L system"'
       $BEGINNING/custom0/ binding '<Super>grave'
+    when: gnome_shell_installed.stdout.find('gnome') != -1
 ...

@@ -84,5 +84,7 @@ gtag(){
 ipv4(){
     hostname -I | awk '{print $1}'
 }
-# print neofetch
-[[  "$TERM_PROGRAM" != "vscode" ]] && neofetch
+# display messages
+if [[  "$TERM_PROGRAM" != "vscode" ]]; then
+    neofetch
+fi
