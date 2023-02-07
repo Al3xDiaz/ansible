@@ -38,15 +38,40 @@ greset() {
     git reset --hard HEAD~$1
 }
 #GIT
+#######################################
+# use example
+# $ gcommit initial commit
+# $ gcommit "initial commit"
+# git pull, git add, git commit & git push
+# ARGUMENTS:
+#   String to commits description
+# OUTPUTS:
+#   void
+# RETURN:
+#   0 if print succeeds, non-zero on error.
+#######################################
 gcommit() {
-    git fetch
-    #do things with parameters like $1 such as
-    git branch
-    git add --all
-    git status
+    #Get tag 
+    GIT_TAG=`git describe --tags --abbrev=0 || echo "1.0.0"`
+    if [ -f package.json ]; then
+        #if exist package.json, will modify file using the gegex: (.*"version".*)"[\d\.]+",
+        sed -E 's/(.*"version".*)"[[:digit:]\.]+",/\1"'"$GIT_TAG"'"/g' package.json | grep version
+       
+        #run test
+        read -p "do you want to run tests? (y\N):" TEST
+        #if you write "y" or "Y", will run test
+        [[ ${TEST^} == "Y" ]] && npm run test
+    fi
+    #pull commits and add files to git
+    git pull && git add --all
+    #create commit
     git commit -m "$*"
+
+    #get all commits unpushed
     COMMITS=$(git cherry -v | wc -l || echo 0)
     read -p "do you want to push ($COMMITS) commit(s)? (y\N):" PUSH
+
+    #if you write "y" or "Y", will push all commits unpushed
     [[ ${PUSH^} == "Y" ]] && git push origin --all
 }
 gcfeat(){

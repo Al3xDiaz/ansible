@@ -69,20 +69,17 @@
       ssh_key_bits: 3072
       ssh_key_file: ".ssh/id_{{ git_name }}"
       ssh_key_passphrase: "{{ server_ssh_key_passphrasse }}"
-
-#set .bashrc
-  # - name: change .bashrc
-  #   ansible.builtin.lineinfile:
-  #     path: ~/.bashrc
-  #     regexp: '\[\[ -f ~/.bash_aliases \]\]'
-  #     line: "[[ -f ~/.bash_aliases ]] && . ~/.bash_aliases"
-  #     create: true
-  #     state: present
   - name: aliases
     copy:
       src: '/root/ansible/files/.bash_aliases'
       dest: '~/.bash_aliases'
       mode: u=rw,g=rw,o=r
+  - name: clean comments in bash_aliases
+    ansible.builtin.lineinfile:
+      path: ~/.bash_aliases
+      regexp: '(^\s+)?(#.*\n)?$'
+      create: true
+      state: absent
 #set keyboard shotcuts
 #note: find schemas in /usr/share/glib-2.0/schemas or:
 #gsettings list-recursively | egrep "Alt|Shift|Super|Space|Win|Meta|Primary|Control|Ctrl|Tab" | grep org.gnome | awk '{print $1}' | sort -u
