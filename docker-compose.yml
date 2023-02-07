@@ -1,16 +1,16 @@
 version: '3.9'
 services:
-    ansible:
-        image: custom-ansible
-        build: 
-            context: .
-            dockerfile: ./ansible/dockerfile
-        volumes:  
-            - ~/container_home:/root/.ssh/
-            - ./ansible/:/root/ansible/
-            - ansible_home:/root/
-        command: ./ansible-test.sh
-        tty: true
+  ansible:
+    image: custom-ansible
+    build: 
+      context: .
+      dockerfile: ./ansible/dockerfile
+    volumes:  
+      - ~/container_home:/root/.ssh/
+      - ./ansible/:/root/ansible/
+      - ansible_home:/root/
+    command: ./ansible-test.sh
+    tty: true
 volumes:
-    inventory:
-    ansible_home:
+  inventory:
+  ansible_home:

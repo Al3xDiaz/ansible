@@ -1,0 +1,14 @@
+# Desciption ansible playbook
+---
+- name: install ssh keys to host
+  hosts: all
+  tasks:
+    - name: Copy SSh Key | copying shh key to remote host
+      authorized_key:
+        user: "{{ansible_user}}"
+        state: present
+        key: "{{ lookup('file', item) }}"
+      with_fileglob:
+      - ansible.pub
+      become: true
+...

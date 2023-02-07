@@ -22,7 +22,7 @@
         remote_src: True
         owner: root
         group: root
-        mode: 0755
+        mode: u=xrw,g=r,o=r
     - name: Update
       tags:
         - copy-file

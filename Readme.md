@@ -5,12 +5,12 @@
 
 ```bash
 # create basic inventory
-cat ansible/inventory && exit
-echo -e "[all]
+cat ansible/inventory || echo -e "[all]
 $(hostname -I | awk '{print $1}') ansible_user=$USER server_ssh_key_passphrasse=\"\" server_gpg_passphrasse=\"\"
 [localhost]
 $(hostname -I | awk '{print $1}') ansible_user=$USER server_ssh_key_passphrasse=\"\" server_gpg_passphrasse=\"\"
 [all:vars]
+ansible_ssh_pass=\"\"
 ansible_sudo_pass=\"\"
 git_name=johndoo 
 git_email=john@doo.es
@@ -51,7 +51,8 @@ docker-compose run --rm ansible ansible all --list-hosts
 ```
 
 ```bash
-docker-compose run --rm ansible sh
+#add ssh key to host
+docker-compose run --rm ansible ansible-playbook playbooks/01_copy_ssh_key.yml
 ```
 
 ## Run playbooks
@@ -117,7 +118,6 @@ docker-compose run --rm ansible ansible-playbook playbooks/testInclude.yml
 rm ~/.tmux.*
 rm ~/.bash_aliases
 ln -s `pwd`/ansible/files/.tmux.conf ~/.tmux.conf
-ln -s `pwd`/ansible/files/.tmux.git.conf ~/.tmux.git.conf
 ln -s `pwd`/ansible/files/.bash_aliases ~/.bash_aliases
 tmux new source-file ~/.tmux.conf
 ```

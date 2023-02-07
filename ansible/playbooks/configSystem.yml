@@ -1,21 +1,24 @@
 # Desciption of the Ansible playbook
 ---
 - name: install tools
-  hosts: all
+  hosts: localhost_alex
   become: false
 # true to become root
 
   tasks:
+  - name: debug user
+    debug: 
+      msg: "ansible user {{ansible_user}} : {{ansible_user_id}}"
 #  config tmux
   - name: "Config tmux"
     copy:
       src: '{{item}}'
       dest: '/home/{{ansible_user_id}}/'
-      mode: '0644'
+      mode: u=rw,g=rw,o=r
     loop:
       - /root/ansible/files/.tmux.conf
       # - /root/ansible/files/.tmux.git.conf
-    register: tmux_copy_files
+    register: tmux_copy_files  
 #reload tmux
   - name: reload tmux
     shell: |
@@ -26,7 +29,17 @@
     ansible.builtin.copy:
       src: /root/ansible/files/ssh.config
       dest: ~/.ssh/config
-      mode: 0664 # 0644
+      mode: u=rw,g=rw,o=r
+      follow: yes
+    register: ssh_config
+  - name: update .ssh/config
+    ansible.builtin.lineinfile:
+      path: ~/.ssh/config
+      regexp: 'IdentityFile.*id_{{ansible_user}}'
+      line: "\tIdentityFile ~/.ssh/id_{{git_name}}"
+      create: true
+      state: present
+    when: ssh_config.changed
 # generate GPG key
   - name: "generate GPG key"
     shell: |
@@ -41,13 +54,9 @@
       Expire-Date: 1y
       EOF
       mkdir -p ~/.gpg/
-      gpg --armor --export {{ git_email }} > ~/.gpg/public_key_{{ git_name }}.txt
-      git config --global user.signinkey {{ git_email }}
-      git config --global gpg.program gpg
+      gpg --armor --export {{ git_email }} > ~/.gpg/public_key_{{ git_name }}.txt      
     args:
       creates: ~/.gpg/public_key_{{ git_name }}.txt
-
-
 #configure git
   - name: git    
     include_tasks: "{{ playbook_dir }}/tasks/git.yml"
@@ -73,7 +82,7 @@
     copy:
       src: '/root/ansible/files/.bash_aliases'
       dest: '~/.bash_aliases'
-      mode: 0644
+      mode: u=rw,g=rw,o=r
 #set keyboard shotcuts
 #note: find schemas in /usr/share/glib-2.0/schemas or:
 #gsettings list-recursively | egrep "Alt|Shift|Super|Space|Win|Meta|Primary|Control|Ctrl|Tab" | grep org.gnome | awk '{print $1}' | sort -u

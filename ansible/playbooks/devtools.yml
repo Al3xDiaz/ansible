@@ -87,7 +87,7 @@
       dest: /usr/share/applications/
       owner: "{{ ansible_user_id }}"
       group: "{{ ansible_user_id }}"
-      mode: 0644
+      mode: u=rw,g=rw,o=r
     args:
       creates: /usr/share/applications/Postman.desktop
  

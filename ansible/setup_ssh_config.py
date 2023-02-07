@@ -17,13 +17,7 @@ try:
             output+=f"Host node-{server}\n"
             output+=f"\tHostName {server}\n"
             output+=f"\tUser {result.group(2)}\n"
-    output+=("Host github\n"
-            "\tHostName github.com\n"
-            "\tUser git\n"
-            "Host gitlab\n"
-            "\tHostName gitlab.com\n"
-            "\tUser git\n"
-            "Host *\n"
+    output+=("Host *\n"
             "\tIdentityFile ~/.ssh/ansible\n"
             "\tAddKeysToAgent yes\n")
     print(output)

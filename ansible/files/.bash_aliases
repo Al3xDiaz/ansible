@@ -88,3 +88,4 @@ ipv4(){
 if [[  "$TERM_PROGRAM" != "vscode" ]]; then
     neofetch
 fi
+export IP_HOST=`ipv4`

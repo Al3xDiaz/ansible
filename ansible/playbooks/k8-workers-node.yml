@@ -11,7 +11,7 @@
       dest: /tmp/command.sh
       owner: "{{ ansible_user_id }}"
       group: "{{ ansible_user_id }}"
-      mode: 'u=rwx,g=rx,o=rx'
+      mode: u=rw,g=rw,o=r
   - name: Cluster join command
     command: sh /tmp/command.sh
 ...
