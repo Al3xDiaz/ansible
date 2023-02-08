@@ -1,7 +1,7 @@
 # Desciption of the Ansible playbook
 ---
 - name: install tools
-  hosts: localhost_alex
+  hosts: all
   become: false
 # true to become root
 
@@ -15,6 +15,7 @@
       src: '{{item}}'
       dest: '/home/{{ansible_user_id}}/'
       mode: u=rw,g=rw,o=r
+      follow: yes
     loop:
       - /root/ansible/files/.tmux.conf
       # - /root/ansible/files/.tmux.git.conf
@@ -25,20 +26,24 @@
       tmux new source-file ~/.tmux.conf
     when: tmux_copy_files.changed
 # config ssh
-  - name: "copy ssh config"
+  - name: Copy using inline content
+    vars:
+      ssh_config_content: |
+        Host github
+            User git
+            HostName github.com
+        Host gitlab
+            User git
+            HostName gitlab.com    
+        Host *
+            AddKeysToAgent yes
+            PreferredAuthentications publickey
+            IdentityFile ~/.ssh/id_{{git_name}}
     ansible.builtin.copy:
-      src: /root/ansible/files/ssh.config
+      content: "{{ssh_config_content}}"
       dest: ~/.ssh/config
       mode: u=rw,g=rw,o=r
       follow: yes
-    register: ssh_config
-  - name: update .ssh/config
-    ansible.builtin.lineinfile:
-      path: ~/.ssh/config
-      regexp: 'IdentityFile.*id_{{ansible_user}}'
-      line: "\tIdentityFile ~/.ssh/id_{{git_name}}"
-      create: true
-      state: present
     when: ssh_config.changed
 # generate GPG key
   - name: "generate GPG key"
@@ -74,10 +79,11 @@
       src: '/root/ansible/files/.bash_aliases'
       dest: '~/.bash_aliases'
       mode: u=rw,g=rw,o=r
+      follow: yes
   - name: clean comments in bash_aliases
     ansible.builtin.lineinfile:
       path: ~/.bash_aliases
-      regexp: '(^\s+)?(#.*\n)?$'
+      regexp: '^(\s+)?(#.*)?$'
       create: true
       state: absent
 #set keyboard shotcuts
