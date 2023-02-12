@@ -8,7 +8,10 @@
         user: "{{ansible_user}}"
         state: present
         key: "{{ lookup('file', item) }}"
-      with_fileglob:
-      - ansible.pub
-      become: true
+      # debug:
+      #   msg: "{{item}}"
+      # with_items: /home/user_keys/
+      loop: "{{ lookup('fileglob', '/home/user_keys/*', wantlist=True) }}"
+      when: item | regex_findall('.*pub$', multiline=True, ignorecase=True)
+      become: false
 ...

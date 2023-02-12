@@ -7,6 +7,7 @@ services:
       dockerfile: ./ansible/dockerfile
     volumes:  
       - ~/container_home:/root/.ssh/
+      - ~/.ssh/:/home/user_keys
       - ./ansible/:/root/ansible/
       - ansible_home:/root/
     command: ./ansible-test.sh
