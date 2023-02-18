@@ -52,10 +52,10 @@ greset() {
 #######################################
 gcommit() {
     #Get tag 
-    GIT_TAG=`git describe --tags --abbrev=0 || echo "1.0.0"`
+    GIT_TAG=`git tag | tail -1`
     if [ -f package.json ]; then
         #if exist package.json, will modify file using the gegex: (.*"version".*)"[\d\.]+",
-        sed -E 's/(.*"version".*)"[[:digit:]\.]+",/\1"'"$GIT_TAG"'"/g' package.json | grep version
+        sed -i -E 's/(.*"version".*)"[[:digit:]\.]+",/\1"'"${GIT_TAG:-1.0.0}"'",/g' package.json #| grep version
        
         #run test
         read -p "do you want to run tests? (y\N):" TEST
@@ -63,9 +63,8 @@ gcommit() {
         [[ ${TEST^} == "Y" ]] && npm run test
     fi
     #pull commits and add files to git
-    git pull && git add --all
-    #create commit
-    git commit -m "$*"
+    git pull
+    git add --all && git commit -m "$*"
 
     #get all commits unpushed
     COMMITS=$(git cherry -v | wc -l || echo 0)

@@ -44,7 +44,6 @@
       dest: ~/.ssh/config
       mode: u=rw,g=rw,o=r
       follow: yes
-    when: ssh_config.changed
 # generate GPG key
   - name: "generate GPG key"
     shell: |
