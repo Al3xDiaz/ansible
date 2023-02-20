@@ -37,13 +37,14 @@
             HostName gitlab.com    
         Host *
             AddKeysToAgent yes
-            PreferredAuthentications publickey
+            PreferredAuthentications publickey,password
             IdentityFile ~/.ssh/id_{{git_name}}
     ansible.builtin.copy:
       content: "{{ssh_config_content}}"
       dest: ~/.ssh/config
-      mode: u=rw,g=rw,o=r
-      follow: yes
+      mode: u+rw,g-rwx,o-rwx
+    args:
+      creates: /home/{{ansible_user}}/.ssh/config
 # generate GPG key
   - name: "generate GPG key"
     shell: |
@@ -85,6 +86,12 @@
       regexp: '^(\s+)?(#.*)?$'
       create: true
       state: absent
+  - name: kubectl completion bash
+    ansible.builtin.lineinfile:
+      path: ~/.bash_aliases
+      regexp: '^source\s<\(kubectl.*?$'
+      line: "source <(kubectl completion bash)"
+      create: true
 #set keyboard shotcuts
 #note: find schemas in /usr/share/glib-2.0/schemas or:
 #gsettings list-recursively | egrep "Alt|Shift|Super|Space|Win|Meta|Primary|Control|Ctrl|Tab" | grep org.gnome | awk '{print $1}' | sort -u

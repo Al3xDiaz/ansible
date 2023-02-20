@@ -46,6 +46,8 @@
     args:
       creates: /usr/bin/code
 
+# install kubectl
+
 #install spotify
   - name: install spotify
     shell: |
