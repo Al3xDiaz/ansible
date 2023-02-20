@@ -43,8 +43,7 @@
       content: "{{ssh_config_content}}"
       dest: ~/.ssh/config
       mode: u+rw,g-rwx,o-rwx
-    args:
-      creates: /home/{{ansible_user}}/.ssh/config
+      force: false
 # generate GPG key
   - name: "generate GPG key"
     shell: |
