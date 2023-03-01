@@ -7,7 +7,9 @@
 
   tasks:
   - name: debug user
-    debug: 
+    tags:
+      - debug
+    debug:
       msg: "ansible user {{ansible_user}} : {{ansible_user_id}}"
 #  config tmux
   - name: "Config tmux"
@@ -19,12 +21,7 @@
     loop:
       - /root/ansible/files/.tmux.conf
       # - /root/ansible/files/.tmux.git.conf
-    register: tmux_copy_files  
-#reload tmux
-  - name: reload tmux
-    shell: |
-      tmux new source-file ~/.tmux.conf
-    when: tmux_copy_files.changed
+    register: tmux_copy_files
 # config ssh
   - name: Copy using inline content
     vars:
@@ -34,7 +31,7 @@
             HostName github.com
         Host gitlab
             User git
-            HostName gitlab.com    
+            HostName gitlab.com
         Host *
             AddKeysToAgent yes
             PreferredAuthentications publickey,password
@@ -58,11 +55,11 @@
       Expire-Date: 1y
       EOF
       mkdir -p ~/.gpg/
-      gpg --armor --export {{ git_email }} > ~/.gpg/public_key_{{ git_name }}.txt      
+      gpg --armor --export {{ git_email }} > ~/.gpg/public_key_{{ git_name }}.txt
     args:
       creates: ~/.gpg/public_key_{{ git_name }}.txt
 #configure git
-  - name: git    
+  - name: git
     include_tasks: "{{ playbook_dir }}/tasks/git.yml"
 
 # generete ssh-keys
@@ -73,6 +70,18 @@
       ssh_key_bits: 3072
       ssh_key_file: ".ssh/id_{{ git_name }}"
       ssh_key_passphrase: "{{ server_ssh_key_passphrasse }}"
+  - name: HOME/.bashrc
+    tags: bashrc
+    ansible.builtin.blockinfile:
+      path: ~/.bashrc
+      block: |
+        if [ -f .env ]; then
+          read -p "Load .env file? [Y/n] " load
+          if [ "${load^}" != "n" ]; then
+            source <(sed -r 's/"/\\"/g' .env | sed -r 's/([^=]+)=(.*)/export \1="\2"/g')
+          fi
+        fi
+        source <(kubectl completion bash)
   - name: aliases
     copy:
       src: '/root/ansible/files/.bash_aliases'
@@ -85,12 +94,6 @@
       regexp: '^(\s+)?(#.*)?$'
       create: true
       state: absent
-  - name: kubectl completion bash
-    ansible.builtin.lineinfile:
-      path: ~/.bash_aliases
-      regexp: '^source\s<\(kubectl.*?$'
-      line: "source <(kubectl completion bash)"
-      create: true
 #set keyboard shotcuts
 #note: find schemas in /usr/share/glib-2.0/schemas or:
 #gsettings list-recursively | egrep "Alt|Shift|Super|Space|Win|Meta|Primary|Control|Ctrl|Tab" | grep org.gnome | awk '{print $1}' | sort -u
@@ -105,7 +108,7 @@
       gsettings set org.gnome.desktop.wm.keybindings switch-applications "['<Alt>Tab']"
       #set switch group with gsettings
       set org.gnome.desktop.wm.keybindings switch-group "['<Super>Tab']"
-  
+
   - name: Register gnome-shell installation status
     command: which gnome-shell
     changed_when: false

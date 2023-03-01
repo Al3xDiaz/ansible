@@ -1,6 +1,9 @@
 version: '3.9'
 services:
   ansible:
+    extra_hosts:
+      - "host-machine-1:192.168.1.16"
+      - "host-machine-2:192.168.1.16"
     image: custom-ansible
     build: 
       context: .
