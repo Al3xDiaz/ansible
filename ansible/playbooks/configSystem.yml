@@ -75,6 +75,7 @@
     ansible.builtin.blockinfile:
       path: ~/.bashrc
       block: |
+        export LANGUAGE=en_US.UTF-8
         if [ -f .env ]; then
           read -p "Load .env file? [Y/n] " load
           if [ "${load^}" != "n" ]; then
