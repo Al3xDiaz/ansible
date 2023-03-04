@@ -101,8 +101,8 @@ gtag(){
         git tag
     else
          git tag -a $1 -m "$2"
-        read -p "push tags? (yes/No)" push
-        [[ "${push^}" == "YES" ]]  && git push origin --tags
+        read -p "push tags? (Y/n)" push
+        [[ "${push^}" != "Y" ]]  && git push origin --tags
     fi
 }
 ipv4(){
