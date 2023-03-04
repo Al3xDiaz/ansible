@@ -68,10 +68,10 @@ gcommit() {
 
     #get all commits unpushed
     COMMITS=$(git cherry -v | wc -l || echo 0)
-    read -p "do you want to push ($COMMITS) commit(s)? (y\N):" PUSH
+    read -p "do you want to push ($COMMITS) commit(s)? (Y/n):" PUSH
 
     #if you write "y" or "Y", will push all commits unpushed
-    [[ ${PUSH^} == "Y" ]] && git push origin --all
+    [[ ${PUSH^} != "N" ]] && git push origin --all
 }
 gcfeat(){
     gcommit "[feat] $@"
