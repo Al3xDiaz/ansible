@@ -83,6 +83,16 @@
           fi
         fi
         source <(kubectl completion bash)
+  - name: latte dock shortcuts
+    ansible.builtin.blockinfile:
+      path: ~/.config/kwinrc
+      block: |
+        [ModifierOnlyShortcuts]
+        Meta=org.kde.lattedock,/Latte,org.kde.LatteDock,activateLauncherMenu
+    register: latte_dock
+  - name: restart qdbus
+    shell: qdbus org.kde.KWin /KWin reconfigure
+    when: latte_dock.changed
   - name: aliases
     copy:
       src: '/root/ansible/files/.bash_aliases'
