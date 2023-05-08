@@ -6,6 +6,10 @@
 # true to become root
 
   tasks:
+  - name: install tools
+    apt:
+      pkg:
+        - figlet
   - name: debug user
     tags:
       - debug
@@ -82,7 +86,7 @@
             source <(sed -r 's/"/\\"/g' .env | sed -r "s/^([^=]+)='?([^']+)'?$/export \1=\"\2\"/g")
           fi
         fi
-        source <(kubectl completion bash)
+        # source <(kubectl completion bash)
   - name: latte dock shortcuts
     ansible.builtin.blockinfile:
       path: ~/.config/kwinrc

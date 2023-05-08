@@ -1,86 +1,58 @@
+if [[ -d .git ]]
+then
+    export git_remote=`git remote`
+    export git_branch=`git branch --show-current`
+fi
 alias ll='ls -l'
 alias la='ls -lA'
 alias l='ls -CF'
 alias open=xdg-open
-#git
 alias gpull="git pull"
 alias gfetch="git fetch"
 alias gmerge="git merge"
 alias gbranch="git branch"
 alias newbranch="git checkout -b"
 alias gsign="git config --global user.signinkey"
-#DOCKER
 alias dimages="docker images"
 alias dps="docker ps"
 alias dpsa="docker ps -a"
 alias dprune="docker system prune -af"
-#grep
 alias grep="grep --color=auto"
-#pbcopy
 alias pbcopy="xclip -selection clipboard"
 alias pbpaste="xclip -selection clipboard -o"
-#apt
 alias apt-get='sudo apt-get'
 alias update='sudo apt-get update && sudo apt-get upgrade'
-#vim
 alias vi=vim
 alias svi='sudo vi'
 alias vis='vim "+set si"'
 alias edit='vim'
-#utils
 alias trash="mv --force -t ~/.local/share/Trash $1"
 alias rel='lsb_release -r'
 alias rel='lsb_release -a'
 alias ..='cd ..'
-
-
+password() {
+    echo $@ | base64 | pbcopy
+    pbcopy -o
+}
 greset() {
     git reset --hard HEAD~$1
 }
-#GIT
-#######################################
-# use example
-# $ gcommit initial commit
-# $ gcommit "initial commit"
-# git pull, git add, git commit & git push
-# ARGUMENTS:
-#   String to commits description
-# OUTPUTS:
-#   void
-# RETURN:
-#   0 if print succeeds, non-zero on error.
-#######################################
 gcommit() {
-    #Get tag 
+    rm -rf .git/index.lock
     GIT_TAG=`git tag | tail -1`
-    if [ -f package.json ]; then
-        #if exist package.json, will modify file using the gegex: (.*"version".*)"[\d\.]+",
-        sed -i -E 's/(.*"version".*)"[[:digit:]\.]+",/\1"'"${GIT_TAG:-1.0.0}"'",/g' package.json #| grep version
-       
-        #run test
-        read -p "do you want to run tests? (y\N):" TEST
-        #if you write "y" or "Y", will run test
-        [[ ${TEST^} == "Y" ]] && npm run test
-    fi
-    #pull commits and add files to git
-    git pull
     git add --all && git commit -m "$*"
-
-    #get all commits unpushed
     COMMITS=$(git cherry -v | wc -l || echo 0)
     read -p "do you want to push ($COMMITS) commit(s)? (Y/n):" PUSH
-
-    #if you write "y" or "Y", will push all commits unpushed
-    [[ ${PUSH^} != "N" ]] && git push origin --all
+    [[ ${PUSH^} != "N" ]] && git push --set-upstream $git_remote $git_branch
 }
 gcfeat(){
     gcommit "[feat] $@"
 }
 gcadd(){
-    gcommit "[feat] $@"
+    gcommit "[add] $@"
 }
 gcrm(){
-    gcommit "[feat] $@"
+    gcommit "[remove] $@"
 }
 gcfix(){
     gcommit "[fix] $@"
@@ -108,8 +80,8 @@ gtag(){
 ipv4(){
     hostname -I | awk '{print $1}'
 }
-# display messages
 if [[  "$TERM_PROGRAM" != "vscode" ]]; then
-    neofetch
+    figlet -cl "Debian 10"
 fi
 export IP_HOST=`ipv4`
+PS1="${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@$IP_HOST\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\] \n↳$ "
