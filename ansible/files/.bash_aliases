@@ -38,12 +38,12 @@ greset() {
     git reset --hard HEAD~$1
 }
 gcommit() {
+    read -p "do you want to push ($COMMITS) commit(s)? (Y/n):" PUSH
     rm -rf .git/index.lock
     GIT_TAG=`git tag | tail -1`
     git add --all && git commit -m "$*"
     COMMITS=$(git cherry -v | wc -l || echo 0)
-    read -p "do you want to push ($COMMITS) commit(s)? (Y/n):" PUSH
-    [[ ${PUSH^} != "N" ]] && git push --set-upstream $git_remote $git_branch
+    [[ ${PUSH^} != "N" ]] && echo "will push $COMMITS commit(s)" && git push --set-upstream $git_remote $git_branch
 }
 gcfeat(){
     gcommit "[feat] $@"
