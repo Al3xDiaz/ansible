@@ -34,38 +34,17 @@ password() {
     echo $@ | base64 | pbcopy
     pbcopy -o
 }
-greset() {
-    git reset --hard HEAD~$1
-}
+# git commands
 gcommit() {
+    COMMITS=$((`git cherry -v | wc -l || echo 0` + 1))
     read -p "do you want to push ($COMMITS) commit(s)? (Y/n):" PUSH
     rm -rf .git/index.lock
     GIT_TAG=`git tag | tail -1`
     git add --all && git commit -m "$*"
-    COMMITS=$(git cherry -v | wc -l || echo 0)
     [[ ${PUSH^} != "N" ]] && echo "will push $COMMITS commit(s)" && git push --set-upstream $git_remote $git_branch
 }
-gcfeat(){
-    gcommit "[feat] $@"
-}
-gcadd(){
-    gcommit "[add] $@"
-}
-gcrm(){
-    gcommit "[remove] $@"
-}
-gcfix(){
-    gcommit "[fix] $@"
-}
-gcupdate(){
-    gcommit "[update] $@"
-}
-gcrefactor(){
-    gcommit "[refactor] $@"
-}
-gstash(){
-    git add --all
-    git stash $@
+greset() {
+    git reset --hard HEAD~$1
 }
 gtag(){
     if [[ "$@" == "" ]]
@@ -76,6 +55,42 @@ gtag(){
         read -p "push tags? (Y/n)" push
         [[ "${push^}" != "Y" ]]  && git push origin --tags
     fi
+}
+gstash(){
+    git add --all
+    git stash $@
+}
+# git commits semantic
+# git version x.y.z (major.minor.patch) +patch
+gfix(){
+    gcommit "[fix] $@"
+}
+gbug(){
+    gcommit "[bug] $@"
+}
+gpatch(){
+    gcommit "[patch] $@"
+}
+gupdate(){
+    gcommit "[update] $@"
+}
+# git version x.y.z (major.minor.patch) +minor
+gfeat(){
+    gcommit "[feat] $@"
+}
+gminor(){
+    gcommit "[minor] $@"
+}
+
+# git version x.y.z (major.minor.patch) +major
+gcrefactor(){
+    gcommit "[refactor] $@"
+}
+gbreaking(){
+    gcommit "[breaking] $@"
+}
+gmajor(){
+    gcommit "[major] $@"
 }
 ipv4(){
     hostname -I | awk '{print $1}'
