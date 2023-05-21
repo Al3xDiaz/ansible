@@ -92,6 +92,7 @@ gbreaking(){
 gmajor(){
     gcommit "[major] $@"
 }
+# utils
 ipv4(){
     hostname -I | awk '{print $1}'
 }
