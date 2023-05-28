@@ -32,6 +32,13 @@
         - tmux
         - xclip
         - neofetch
+  - name: install gitversion 
+    when: ansible_os_family == "Debian"
+    shell: |
+      wget -o /tmp/gitversion.tar.gz https://github.com/GitTools/GitVersion/releases/download/5.12.0/gitversion-linux-arm64-5.12.0.tar.gz
+      tar -xvf /tmp/gitversion.tar.gz -C /usr/bin
+    args:
+      creates: /usr/bin/gitversion
 #set vim as default editor.
   - name: set vim as default editor
     shell: "update-alternatives --set editor /usr/bin/vim.basic"
