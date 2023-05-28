@@ -7,12 +7,6 @@ alias ll='ls -l'
 alias la='ls -lA'
 alias l='ls -CF'
 alias open=xdg-open
-alias gpull="git pull"
-alias gfetch="git fetch"
-alias gmerge="git merge"
-alias gbranch="git branch"
-alias newbranch="git checkout -b"
-alias gsign="git config --global user.signinkey"
 alias dimages="docker images"
 alias dps="docker ps"
 alias dpsa="docker ps -a"
@@ -34,14 +28,20 @@ password() {
     echo $@ | base64 | pbcopy
     pbcopy -o
 }
+# git version
+alias gversion="gitversion /nocache /showvariable MajorMinorPatch"
 # git commands
+alias gsign="git config --global user.signinkey"
+alias newbranch="git checkout -b"
 gcommit() {
+    [[ -f inventory ]] && ansible-vault encrypt inventory --vault-password-file password || true
     COMMITS=$((`git cherry -v | wc -l || echo 0` + 1))
     read -p "do you want to push ($COMMITS) commit(s)? (Y/n):" PUSH
     rm -rf .git/index.lock
     GIT_TAG=`git tag | tail -1`
     git add --all && git commit -m "$*"
     [[ ${PUSH^} != "N" ]] && echo "will push $COMMITS commit(s)" && git push --set-upstream $git_remote $git_branch
+    gitversion /nofetch /nocache /showvariable MajorMinorPatch || git tag | tail -1
 }
 greset() {
     git reset --hard HEAD~$1
@@ -92,7 +92,6 @@ gbreaking(){
 gmajor(){
     gcommit "[major] $@"
 }
-# utils
 ipv4(){
     hostname -I | awk '{print $1}'
 }
