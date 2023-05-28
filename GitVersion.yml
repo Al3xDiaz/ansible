@@ -2,7 +2,7 @@ mode: ContinuousDeployment
 branches:
   master:
     regex: ^master|main$
-    tag: 'alpha'
+    tag: ''
   develop:
     regex: ^dev(elop)?(ment)?$
     tag: 'beta'
