@@ -70,9 +70,12 @@ docker-push-latest:
     - tag=$(cat version.txt)
     - longTag=$(cat fullSemVer.txt)
     - docker tag "$CI_REGISTRY_IMAGE:${longTag}" "$CI_REGISTRY_IMAGE:${tag}"
-    - docker tag "$CI_REGISTRY_IMAGE:${tag}" "$CI_REGISTRY_IMAGE:latest"
+    - docker tag "$CI_REGISTRY_IMAGE:${longTag}" "$CI_REGISTRY_IMAGE:latest"
     - docker push "$CI_REGISTRY_IMAGE:${tag}"
     - docker push "$CI_REGISTRY_IMAGE:latest"
+  cache:
+    key: ${CI_BUILD_REF}
+    untracked: true
   only:
     - main
     - master
