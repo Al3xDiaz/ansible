@@ -29,7 +29,7 @@ password() {
     pbcopy -o
 }
 # git version
-alias gversion="gitversion /nocache /showvariable MajorMinorPatch"
+alias gversion="gitversion /nocache /nofetch /showvariable MajorMinorPatch"
 # git commands
 alias gsign="git config --global user.signinkey"
 alias newbranch="git checkout -b"
@@ -38,10 +38,9 @@ gcommit() {
     COMMITS=$((`git cherry -v | wc -l || echo 0` + 1))
     read -p "do you want to push ($COMMITS) commit(s)? (Y/n):" PUSH
     rm -rf .git/index.lock
-    GIT_TAG=`git tag | tail -1`
     git add --all && git commit -m "$*"
     [[ ${PUSH^} != "N" ]] && echo "will push $COMMITS commit(s)" && git push --set-upstream $git_remote $git_branch
-    gitversion /nofetch /nocache /showvariable MajorMinorPatch || git tag | tail -1
+    gitversion /nocache /nofetch /showvariable MajorMinorPatch || git tag | tail -1
 }
 greset() {
     git reset --hard HEAD~$1
