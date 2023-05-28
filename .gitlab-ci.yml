@@ -38,7 +38,7 @@ docker-build:
     - docker:dind
   script:
     - longTag=$(cat fullSemVer.txt)
-    - docker build -t "$CI_REGISTRY_IMAGE${longTag}" .
+    - docker build -t "$CI_REGISTRY_IMAGE:${longTag}" .
 
 docker-push:
   image: docker:latest
