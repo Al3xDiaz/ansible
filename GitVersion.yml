@@ -2,7 +2,7 @@ mode: mainline
 branches:
   master:
     regex: ^ma(ster|in)$
-    tag: ''
+    tag: 'alpha'
   develop:
     regex: ^dev(elop)?(ment)?$
     tag: 'beta'
