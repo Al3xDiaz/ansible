@@ -34,7 +34,7 @@ alias gversion="gitversion /nocache /showvariable MajorMinorPatch"
 alias gsign="git config --global user.signinkey"
 alias newbranch="git checkout -b"
 gcommit() {
-    [[ -f inventory ]] && ansible-vault encrypt inventory --vault-password-file password || true
+    [[ -f inventory ]] && ansible-vault encrypt inventory --vault-password-file .vault_pass.txt || true
     COMMITS=$((`git cherry -v | wc -l || echo 0` + 1))
     read -p "do you want to push ($COMMITS) commit(s)? (Y/n):" PUSH
     rm -rf .git/index.lock

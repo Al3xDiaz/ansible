@@ -33,6 +33,11 @@ docker-compose up
 ## Commands available
 
 ```bash
+# install ansible on Debian
+sudo apt-get install ansible
+```
+
+```bash
 ### Ping all host
 # Note: if ping is UNREACHABLE! or Failed to connect to...
 # copy content by ./ansible/ssh-keys/ansible.pub in file ~/.ssh/authorized_keys in your server.
@@ -59,57 +64,57 @@ docker-compose run --rm ansible ansible-playbook playbooks/01_copy_ssh_key.yml
 
 ```bash
 #test
-docker-compose run --rm ansible ansible-playbook playbooks/configSystem.yml
+docker-compose run --rm ansible ansible-playbook playbooks/configSystem.yml --check
 ```
 
 ```bash
 #test
-docker-compose run --rm ansible ansible-playbook playbooks/devtools.yml
+docker-compose run --rm ansible ansible-playbook playbooks/devtools.yml --check
 ```
 
 ```bash
 #test
-docker-compose run --rm ansible ansible-playbook playbooks/docker.yml
+docker-compose run --rm ansible ansible-playbook playbooks/docker.yml --check
 ```
 
 ```bash
 #test
-docker-compose run --rm ansible ansible-playbook playbooks/htopPlaybook.yml
+docker-compose run --rm ansible ansible-playbook playbooks/htopPlaybook.yml --check
 ```
 
 ```bash
 #test
-docker-compose run --rm ansible ansible-playbook playbooks/interface.yml
+docker-compose run --rm ansible ansible-playbook playbooks/interface.yml --check
 ```
 
 ```bash
 #test
-docker-compose run --rm ansible ansible-playbook playbooks/interpreters.yml
+docker-compose run --rm ansible ansible-playbook playbooks/interpreters.yml --check
 ```
 
 ```bash
 #test
-docker-compose run --rm ansible ansible-playbook playbooks/k8-master-node.yml
+docker-compose run --rm ansible ansible-playbook playbooks/k8-master-node.yml --check
 ```
 
 ```bash
 #test
-docker-compose run --rm ansible ansible-playbook playbooks/k8-nodes.yml
+docker-compose run --rm ansible ansible-playbook playbooks/k8-nodes.yml --check
 ```
 
 ```bash
 #test
-docker-compose run --rm ansible ansible-playbook playbooks/k8-workers-node.yml
+docker-compose run --rm ansible ansible-playbook playbooks/k8-workers-node.yml --check
 ```
 
 ```bash
 #test
-docker-compose run --rm ansible ansible-playbook playbooks/nginx.yml
+docker-compose run --rm ansible ansible-playbook playbooks/nginx.yml --check
 ```
 
 ```bash
 #test
-docker-compose run --rm ansible ansible-playbook playbooks/testInclude.yml
+docker-compose run --rm ansible ansible-playbook playbooks/testInclude.yml --check
 ```
 
 ## link config files to host
@@ -117,8 +122,8 @@ docker-compose run --rm ansible ansible-playbook playbooks/testInclude.yml
 ```bash
 rm ~/.tmux.*
 rm ~/.bash_aliases
-ln -s `pwd`/ansible/files/.tmux.conf ~/.tmux.conf
-ln -s `pwd`/ansible/files/.bash_aliases ~/.bash_aliases
+ln -s `pwd`/files/.tmux.conf ~/.tmux.conf
+ln -s `pwd`/files/.bash_aliases ~/.bash_aliases
 tmux new source-file ~/.tmux.conf
 ```
 
@@ -153,17 +158,4 @@ KEY_ID=$YOUR_EMAIL
 gpg --armor --export $KEY_ID
 
 
-```
-
-#### configure key
-
-```bash
-EMAIL=$(git config --global user.email)
-
-echo "writte your email [$EMAIL]]"
-read YOUR_EMAIL
-[[ "$YOUR_EMAIL" == "" ]] && YOUR_EMAIL=$EMAIL
-
-git config --global user.signinkey $KEY_ID
-git config --global gpg.program gpg
 ```

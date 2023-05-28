@@ -1,6 +1,6 @@
-inventory
 .env
-*/inventory
 vars/
 ssh-keys/
 .vscode/
+output/*
+.vault_pass.txt

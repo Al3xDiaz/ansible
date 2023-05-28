@@ -4,14 +4,14 @@ services:
     extra_hosts:
       - "host-machine-1:$IP_HOST"
       - "host-machine-2:$IP_HOST"
-    image: custom-ansible
+    image: gcr.io/al3xdiaz/ansible:latest
     build: 
       context: .
-      dockerfile: ./ansible/dockerfile
+      dockerfile: ./dockerfile
     volumes:  
       - ~/container_home:/root/.ssh/
       - ~/.ssh/:/home/user_keys
-      - ./ansible/:/root/ansible/
+      - ./:/root/ansible/
       - ansible_home:/root/
     command: ./ansible-test.sh
     tty: true
