@@ -96,7 +96,7 @@ ipv4(){
     hostname -I | awk '{print $1}'
 }
 if [[  "$TERM_PROGRAM" != "vscode" ]]; then
-    figlet -cl "Debian 10"
+    neofetch
 fi
 export IP_HOST=`ipv4`
 PS1="${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@$IP_HOST\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\] \n↳$ "
