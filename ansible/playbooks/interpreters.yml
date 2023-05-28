@@ -7,30 +7,25 @@
   tasks:
   # update
   - name: "Update Repository cache"
+    when: ansible_os_family == "Debian"
     tags:
       - nodejs
-      - python
       - golang
     apt:
       update_cache: true
       cache_valid_time: 3600
       force_apt_get: true
   - name: Add Node.js LTS
+    when: ansible_os_family == "Debian"
     tags:
       - nodejs
     shell: |
         curl -fsSL https://deb.nodesource.com/setup_lts.x | bash -
         apt install nodejs -y
-
-  - name: Install reqired packages
-    tags:
-      - python
-    apt:
-      pkg:
-        - curl
-        - wget
-  
+    args:
+      creates: /usr/bin/node  
   - name: "install golang"
+    when: ansible_os_family == "Debian"
     tags:
       - golang
     shell: |
@@ -39,8 +34,12 @@
       wget https://dl.google.com/go/$GO_VERSION.linux-amd64.tar.gz
       tar xvf $GO_VERSION.linux-amd64.tar.gz -C /usr/local/
       rm $GO_VERSION.linux-amd64.tar.gz
+    args:
+      creates: /usr/local/go
+    register: go_install
   
   - name: "add go_path to path global"
+    when: go_install.changed
     tags:
       - golang
     shell: |

@@ -2,10 +2,14 @@
 ---
 - name: install kubeadmin
   hosts: worker
-  become: true # true to become root
+  become: true
 
   tasks:
+  - name: install k8s node
+    include_tasks: tasks/k8s-nodes.yml
+
   - name: copy command.sh
+    when: ansible_os_family == "Debian"
     ansible.builtin.copy:
       src: /root/ansible/outputs/command.sh
       dest: /tmp/command.sh

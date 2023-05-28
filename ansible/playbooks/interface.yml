@@ -8,14 +8,17 @@
   tasks:
   #gnome extentions
   - name: install
+    when: ansible_os_family == "Debian"
     tags:
       - gnome-extensions
     shell: |
         wget -O gnome-shell-extension-installer "https://github.com/brunelli/gnome-shell-extension-installer/raw/master/gnome-shell-extension-installer"
         chmod +x gnome-shell-extension-installer
         mv gnome-shell-extension-installer /usr/bin/
-#install gnome extentios
+    args:
+      creates: /usr/bin/gnome-shell-extension-installer
   - name: "gnome extentions"
+    when: ansible_os_family == "Debian"
     tags:
       - gnome-extensions
     shell: | 
@@ -23,24 +26,26 @@
         gnome-shell-extension-installer 3088 # Install "Extension list"
     become: no
     become_user: "{{ ansible_user_id }}"
-#fonts
   - name: "download fonts"
     tags:
       - fonts
     get_url:
       url: https://github.com/microsoft/cascadia-code/releases/download/v2111.01/CascadiaCode-2111.01.zip
       dest: /tmp/cascadia.zip
+      mode: 0644
+    register: download_result
+    until: download_result is succeeded
+    args:
+      creates: /root/{{ ansible_user_id }}/.local/share/fonts/CascadiaCode-2111.01
   - name: "install fonts"
+    when: download_result.changed
     tags:
-      - frontend
-      - backend
       - fonts
     shell: |
-      mkdir /tmp/fonts
-      mv /tmp/cascadia.zip /tmp/fonts 
-      cd /tmp/fonts
-      unzip -o cascadia.zip
+      unzip -o /tmp/fonts/cascadia.zip -d /tmp/fonts
       cp ttf/Cascadia* /root/{{ ansible_user_id }}/.local/share/fonts
+      cp otf/Cascadia* /root/{{ ansible_user_id }}/.local/share/fonts
+      cp woff2/Cascadia* /root/{{ ansible_user_id }}/.local/share/fonts
       fc-cache -f -v
       rm -rf /tmp/fonts
 ...
