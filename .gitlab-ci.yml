@@ -13,10 +13,12 @@ stages:
   - push
 
 get_version:
-  image: gitversion/gitversion:latest-linux
+  image: 
+    name: gittools/gitversion:5.12.0-alpine.3.14-6.0
+    entrypoint: [""]
   stage: version
   script:
-    - gitversion /output /nofetch /showvariable MajorMinorPatch > version.txt
+    - /tools/GitVersion /nofetch /showvariable MajorMinorPatch > version.txt
     - cat version.txt
   artifacts:
     paths:
