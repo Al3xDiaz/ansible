@@ -16,6 +16,10 @@ get_version:
   image: 
     name: gittools/gitversion:5.12.0-alpine.3.14-6.0
     entrypoint: [""]
+  variables:
+    GIT_STRATEGY: fetch
+    GIT_DEPTH: 0
+    IGNORE_NORMALISATION_GIT_HEAD_MOVE: 1
   stage: version
   script:
     - /tools/dotnet-gitversion /nocache /nofetch /showvariable MajorMinorPatch > version.txt
