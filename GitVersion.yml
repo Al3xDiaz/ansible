@@ -1,7 +1,7 @@
 mode: ContinuousDeployment
 branches:
   master:
-    regex: ^master|main$
+    regex: ^ma(ster|in)$
     tag: ''
   develop:
     regex: ^dev(elop)?(ment)?$
