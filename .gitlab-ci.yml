@@ -49,7 +49,7 @@ docker-push:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
   script:
     - longTag=$(cat fullSemVer.txt)    
-    - docker push "$CI_REGISTRY_IMAGE${longTag}"
+    - docker push "$CI_REGISTRY_IMAGE:${longTag}"
   
 docker-push-latest:
   image: docker:latest
@@ -61,8 +61,8 @@ docker-push-latest:
   script:
     - tag=$(cat version.txt)
     - longTag=$(cat fullSemVer.txt)
-    - docker tag "$CI_REGISTRY_IMAGE${longTag}" "$CI_REGISTRY_IMAGE${tag}"
-    - docker tag "$CI_REGISTRY_IMAGE${tag}" "$CI_REGISTRY_IMAGE:latest"
+    - docker tag "$CI_REGISTRY_IMAGE:${longTag}" "$CI_REGISTRY_IMAGE:${tag}"
+    - docker tag "$CI_REGISTRY_IMAGE:${tag}" "$CI_REGISTRY_IMAGE:latest"
   only:
     - main
     - master
