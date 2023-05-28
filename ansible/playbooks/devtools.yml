@@ -13,7 +13,7 @@
       cache_valid_time: 3600
       force_apt_get: true
     when:
-      - ansible_facts['distribution'] == "Debian"
+      - ansible_os_family == "Debian"
 #dependences
   - name: install dependences
     tags:
@@ -32,6 +32,8 @@
         - tmux
         - xclip
         - neofetch
+    when:
+      - ansible_os_family == "Debian"
   - name: install gitversion 
     when: ansible_os_family == "Debian"
     shell: |
@@ -44,6 +46,7 @@
     shell: "update-alternatives --set editor /usr/bin/vim.basic"
 #install VS code
   - name: downland vs code
+    when: ansible_os_family == "Debian"
     shell: |
       # wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
       # install -o root -g root -m 644 packages.microsoft.gpg /etc/apt/trusted.gpg.d/
@@ -52,11 +55,9 @@
       # apt update && apt install code -y
     args:
       creates: /usr/bin/code
-
-# install kubectl
-
 #install spotify
   - name: install spotify
+    when: ansible_os_family == "Debian"
     shell: |
       apt-get upgrade -y
       curl -sS https://download.spotify.com/debian/pubkey_5E3C45D7B312C643.gpg | apt-key add - keyserver=hkp://keyserver.ubuntu.com:80 id=931FF8E79F0876134EDDBDCCA87FF9DF48BF1C90 state=present
@@ -68,19 +69,23 @@
 
 #chrome
   - name: "install chrome"
+    when: ansible_os_family == "Debian"
     apt:
       deb: https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
  
 #postman
   - name: "downland postman & extract postman"
+    when: ansible_os_family == "Debian"
     shell: |
       wget https://dl.pstmn.io/download/latest/linux64
       tar -xvf linux64 -C /usr/bin
+    register: postman
     args:
       chdir: /tmp/
       creates: /usr/bin/Postman/Postman
 
   - name: "alias postman"
+    when: ansible_os_family == "Debian"
     ansible.builtin.lineinfile:
       path: ~/.bashrc
       regexp: "^export.*Postman"      
@@ -91,6 +96,7 @@
     become_user: "{{ ansible_user_id }}"
 
   - name: "create desktop access icon"
+    when: postman.changed
     ansible.builtin.copy:
       src: /root/ansible/files/desktop_access/Postman.desktop
       dest: /usr/share/applications/
@@ -99,13 +105,16 @@
       mode: u=rw,g=rw,o=r
     args:
       creates: /usr/share/applications/Postman.desktop
+    register: postman_desktop_access
  
   - name: Remove the installer
+    when: postman_desktop_access.changed
     file: 
       path: /tmp/linux64
       state: absent
 
   - name: "install node js"
+    when: ansible_os_family == "Debian"
     shell: |
       curl -fsSL https://deb.nodesource.com/setup_lts.x | bash -
       apt-get install -y nodejs
@@ -114,8 +123,7 @@
   
   #mysql
   - name: change mysql config
-    tags: 
-      - mysql
+    when: ansible_os_family == "Debian"
     ansible.builtin.lineinfile:
       path: /etc/fstab
       regexp: '^(.*)(remount-ro.*)$'
