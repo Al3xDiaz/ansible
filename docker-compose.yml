@@ -15,6 +15,13 @@ services:
       - ansible_home:/root/
     command: ./ansible-test.sh
     tty: true
+  version:
+    image: gittools/gitversion:5.12.0-alpine.3.14-6.0
+    working_dir: /repo
+    volumes:
+      - ./:/repo
+    entrypoint: /tools/dotnet-gitversion
+    command: /nocache /nofetch /showvariable MajorMinorPatch
 volumes:
   inventory:
   ansible_home:

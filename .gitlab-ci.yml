@@ -18,11 +18,14 @@ get_version:
     entrypoint: [""]
   stage: version
   script:
-    - /tools/dotnet-gitversion /nofetch /showvariable MajorMinorPatch > version.txt
+    - /tools/dotnet-gitversion /nocache /nofetch /showvariable MajorMinorPatch > version.txt
+    - /tools/dotnet-gitversion /nocache /nofetch /showvariable FullSemVer > fullSemVer.txt
     - cat version.txt
+    - cat fullSemVer.txt
   artifacts:
     paths:
       - version.txt
+      - fullSemVer.txt
 
 docker-build:
   image: docker:latest
@@ -30,8 +33,8 @@ docker-build:
   services:
     - docker:dind
   script:
-    - tag=$(cat version.txt)
-    - docker build --pull -t "$CI_REGISTRY_IMAGE${tag}" -f dockerfile .
+    - longTag=$(cat fullSemVer.txt)
+    - docker build -t "$CI_REGISTRY_IMAGE${longTag}" .
 
 docker-push:
   image: docker:latest
@@ -41,8 +44,8 @@ docker-push:
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
   script:
-    - tag=$(cat version.txt)
-    - docker push "$CI_REGISTRY_IMAGE${tag}"
+    - longTag=$(cat fullSemVer.txt)    
+    - docker push "$CI_REGISTRY_IMAGE${longTag}"
   
 docker-push-latest:
   image: docker:latest
@@ -53,6 +56,8 @@ docker-push-latest:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
   script:
     - tag=$(cat version.txt)
+    - longTag=$(cat fullSemVer.txt)
+    - docker tag "$CI_REGISTRY_IMAGE${longTag}" "$CI_REGISTRY_IMAGE${tag}"
     - docker tag "$CI_REGISTRY_IMAGE${tag}" "$CI_REGISTRY_IMAGE:latest"
   only:
     - main
