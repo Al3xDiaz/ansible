@@ -34,12 +34,13 @@ alias gversion="gitversion /nocache /nofetch /showvariable MajorMinorPatch"
 alias gsign="git config --global user.signinkey"
 alias newbranch="git checkout -b"
 gcommit() {
+    git branch $git_branch -u "$git_remote/$git_branch"
     [[ -f inventory ]] && ansible-vault encrypt inventory --vault-password-file .vault_pass.txt || true
     COMMITS=$((`git cherry -v | wc -l || echo 0` + 1))
     read -p "do you want to push ($COMMITS) commit(s)? (Y/n):" PUSH
     rm -rf .git/index.lock
     git add --all && git commit -m "$*"
-    [[ ${PUSH^} != "N" ]] && echo "will push $COMMITS commit(s)" && git push --set-upstream $git_remote $git_branch
+    [[ ${PUSH^} != "N" ]] && echo "will push $COMMITS commit(s)" && git push $git_remote $git_branch
     gitversion /nocache /nofetch /showvariable MajorMinorPatch || git tag | tail -1
 }
 greset() {
