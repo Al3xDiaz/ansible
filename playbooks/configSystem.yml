@@ -5,6 +5,18 @@
   become: false
 
   tasks:
+  - name: Add bullseye repository into sources list
+    ansible.builtin.apt_repository:
+      repo: deb http://ftp.de.debian.org/debian bullseye main non-free
+      state: present
+  - name: install bluetooth components
+    apt:
+      pkg:
+        - bluez-firmware
+        - pulseaudio-module-bluetooth
+        - pavucontrol
+        - pavucontrol-qt
+    when: ansible_os_family == "Debian"
   - name: install tools
     when: ansible_os_family == "Debian"
     apt:
