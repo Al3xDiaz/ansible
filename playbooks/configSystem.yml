@@ -17,6 +17,10 @@
         - pavucontrol
         - pavucontrol-qt
     when: ansible_os_family == "Debian"
+    register: bluetooth
+  - name: restart pulse audio
+    command: killall pulseaudio
+    when: bluetooth.changed
   - name: install tools
     when: ansible_os_family == "Debian"
     apt:
