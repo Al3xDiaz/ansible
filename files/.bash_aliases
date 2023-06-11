@@ -1,8 +1,3 @@
-if [[ -d .git ]]
-then
-    export git_remote=`git remote`
-    export git_branch=`git branch --show-current`
-fi
 alias ll='ls -l'
 alias la='ls -lA'
 alias l='ls -CF'
@@ -29,7 +24,7 @@ password() {
     pbcopy -o
 }
 # git version
-alias gversion="gitversion /nocache /nofetch /showvariable MajorMinorPatch"
+alias gversion="[ -d .git/ ] && (gitversion /nocache /nofetch /showvariable MajorMinorPatch || git tag | tail -1) || echo 'no version'"
 # git commands
 alias gsign="git config --global user.signinkey"
 alias newbranch="git checkout -b"
@@ -99,4 +94,10 @@ if [[  "$TERM_PROGRAM" != "vscode" ]]; then
     neofetch
 fi
 export IP_HOST=`ipv4`
-PS1="${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@$IP_HOST\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\] \n↳$ "
+if [[ -d .git/ ]]; then
+    export git_remote=`git remote`
+    export git_branch=`git branch --show-current`
+    PS1="${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@$IP_HOST\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\] \e[0;34m[\[$git_branch\]] v$(gversion)\n\e[m↳$ "
+else
+    PS1="${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@$IP_HOST\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\n↳$ "
+fi
