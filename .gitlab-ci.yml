@@ -54,11 +54,10 @@ docker-build:
     - docker:dind
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
-  script:
-    - TAG=${tag:-latest}
   after_script:
+    - TAG=${TAG:-$(cat version)}
     - docker tag "latest" "$CI_REGISTRY_IMAGE:$TAG"
-    - docker push "$CI_REGISTRY_IMAGE:$TAG"
+    - docker push "$CI_REGISTRY_IMAGE:$TAG}"
   cache:
     key: ${CI_BUILD_REF}
     paths:
@@ -71,7 +70,7 @@ push_latest:
   extends: .docker-push
   stage: push
   variables:
-    tag: latest
+    TAG: latest
   only:
     refs:
       - main
@@ -79,7 +78,7 @@ push_version:
   extends: .docker-push
   stage: push
   script:
-    - TAG=$(cat version.txt)
+    - cat version.txt > version
   only:
     refs:
       - main
@@ -87,7 +86,7 @@ push_fullsemver:
   extends: .docker-push
   stage: push
   script:
-    - TAG=$(cat fullSemVer.txt)
+    - cat fullSemVer.txt > version
   except:
     refs:
       - main
