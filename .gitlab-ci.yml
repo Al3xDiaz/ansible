@@ -27,7 +27,7 @@ get_version:
     - cat version.txt
     - cat fullSemVer.txt
   cache:
-    key: ${CI_BUILD_REF}
+    key: ${CI_COMMIT_BRANCH}
     untracked: true
   only:
     refs:
