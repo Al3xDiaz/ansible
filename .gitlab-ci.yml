@@ -55,16 +55,10 @@ docker-build:
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
   script:
-    - | 
-      if [[ ${TAG,,} == "version" ]];then
-        tag=$(cat version.txt)
-      elif [[ ${TAG,,} == "fullsemver" ]];then
-        tag=$(cat fullSemVer.txt)
-      else
-        tag=${TAG:-latest}
-      fi
-    - docker tag "latest" "$CI_REGISTRY_IMAGE:$tag"
-    - docker push "$CI_REGISTRY_IMAGE:$tag"
+    - TAG=${tag:-latest}
+  after_script:
+    - docker tag "latest" "$CI_REGISTRY_IMAGE:$TAG"
+    - docker push "$CI_REGISTRY_IMAGE:$TAG"
   cache:
     key: ${CI_BUILD_REF}
     paths:
@@ -77,23 +71,23 @@ push_latest:
   extends: .docker-push
   stage: push
   variables:
-    TAG: latest
+    tag: latest
   only:
     refs:
       - main
 push_version:
   extends: .docker-push
   stage: push
-  variables:
-    TAG: version
+  script:
+    - TAG=$(cat version.txt)
   only:
     refs:
       - main
 push_fullsemver:
   extends: .docker-push
   stage: push
-  variables:
-    TAG: fullsemver
+  script:
+    - TAG=$(cat fullSemVer.txt)
   except:
     refs:
       - main
