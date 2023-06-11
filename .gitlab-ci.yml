@@ -39,11 +39,11 @@ docker-build:
   services:
     - docker:dind
   script:
-    - docker build -t "latest" .
+    - docker build -t "ansible" .
   cache:
-    key: ${CI_BUILD_REF}
+    key: ${CI_COMMIT_BRANCH}
     paths:
-      - "/var"
+      - "/var/lib/docker/"
   only:
     refs:
       - main
@@ -58,12 +58,12 @@ docker-build:
     - cat version.txt > version
   after_script:
     - TAG=${TAG:-$(cat version)}
-    - docker tag "latest" "$CI_REGISTRY_IMAGE:$TAG"
+    - docker tag "ansible" "$CI_REGISTRY_IMAGE:$TAG"
     - docker push "$CI_REGISTRY_IMAGE:$TAG}"
   cache:
-    key: ${CI_BUILD_REF}
+    key: ${CI_COMMIT_BRANCH}
     paths:
-      - "/var"
+      - "/var/lib/docker/"
   only:
     - main
     - master
