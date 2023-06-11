@@ -34,45 +34,60 @@ docker-build:
   services:
     - docker:dind
   script:
-    - longTag=$(cat fullSemVer.txt)
-    - docker build -t "$CI_REGISTRY_IMAGE:${longTag}" .
-    - docker save --output image.tar "$CI_REGISTRY_IMAGE:${longTag}"
+    - docker build -t "latest" .
+    - docker save --output image.tar "latest"
   cache:
     key: ${CI_BUILD_REF}
     untracked: true
-docker-push:
+.docker-push:
   image: docker:latest
-  stage: push
   services:
     - docker:dind
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
     - docker load --input image.tar
   script:
-    - longTag=$(cat fullSemVer.txt)    
-    - docker push "$CI_REGISTRY_IMAGE:${longTag}"
-  cache:
-    key: ${CI_BUILD_REF}
-    untracked: true
-docker-push-latest:
-  image: docker:latest
-  stage: push
-  services:
-    - docker:dind
-  before_script:
-    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
-    - docker load --input image.tar
-  script:
-    - tag=$(cat version.txt)
-    - longTag=$(cat fullSemVer.txt)
-    - docker tag "$CI_REGISTRY_IMAGE:${longTag}" "$CI_REGISTRY_IMAGE:${tag}"
-    - docker tag "$CI_REGISTRY_IMAGE:${longTag}" "$CI_REGISTRY_IMAGE:latest"
-    - docker push "$CI_REGISTRY_IMAGE:${tag}"
-    - docker push "$CI_REGISTRY_IMAGE:latest"
+    - | 
+      if [[ ${TAG,,} == "version" ]];then
+        tag=$(cat version.txt)
+      elif [[ ${TAG,,} == "fullsemver" ]];then
+        tag=$(cat fullSemVer.txt)
+      else
+        tag=${TAG:-latest}
+      fi
+    - docker tag "latest" "$tag"
+    - docker push "$tag"
   cache:
     key: ${CI_BUILD_REF}
     untracked: true
   only:
     - main
     - master
+
+push_latest:
+  extends: .docker-push
+  stage: push
+  variables:
+    TAG: latest
+  only:
+    refs:
+      - main
+  
+push_version:
+  extends: .docker-push
+  stage: push
+  variables:
+    TAG: version
+  only:
+    refs:
+      - main
+
+push_fullsemver:
+  extends: .docker-push
+  stage: push
+  variables:
+    TAG: fullsemver
+  only:
+    refs:
+      - main
 ...
