@@ -100,5 +100,12 @@ push_fullsemver:
 
 config:
   stage: config
-  image: $CI_REGISTRY_IMAGE
+  needs:
+    - job: push_latest
+      optional: true
+  image: 
+    name: $CI_REGISTRY_IMAGE:latest
+    entrypoint: [""]
+  script:
+    - "echo hello"
 ...
