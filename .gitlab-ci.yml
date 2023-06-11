@@ -58,6 +58,7 @@ docker-build:
     - cat version.txt > version
   after_script:
     - TAG=${TAG:-$(cat version)}
+    - docker images ls
     - docker tag "ansible" "$CI_REGISTRY_IMAGE:$TAG"
     - docker push "$CI_REGISTRY_IMAGE:$TAG}"
   cache:
