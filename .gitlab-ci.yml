@@ -26,9 +26,9 @@ get_version:
     - /tools/dotnet-gitversion /nocache /nofetch /showvariable FullSemVer > fullSemVer.txt
     - /tools/dotnet-gitversion /nocache /nofetch /showvariable PreReleaseLabel > preReleaseLabel.txt
     - cat *.txt
-  cache:
-    key: ${CI_JOB_ID}
-    untracked: true
+  artifacts:
+    paths:
+      - "*.txt"
   only:
     refs:
       - main
@@ -54,9 +54,9 @@ docker-build:
     - docker tag "ansible" "$CI_REGISTRY_IMAGE:$TAG"
     - docker push "$CI_REGISTRY_IMAGE:$LABEL}"
     - docker push "$CI_REGISTRY_IMAGE:$TAG}"
-  cache:
-    key: ${CI_JOB_ID}
-    untracked: true
+  needs:
+    - job: get_version
+      artifacts: true
   only:
     refs:
       - main
