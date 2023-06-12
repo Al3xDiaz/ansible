@@ -44,16 +44,16 @@ docker-build:
     - | 
       if [[ $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH ]]; then
         TAG=$(cat version.txt)
-        LABEL=""
+        LABEL="latest"
       else
         TAG=$(cat fullSemVer.txt)
         LABEL=$(cat preReleaseLabel.txt)
       fi
-    - docker build --pull -t "$CI_REGISTRY_IMAGE${TAG}" .
-    - docker tag "$CI_REGISTRY_IMAGE${TAG}" "$CI_REGISTRY_IMAGE$LABEL"
-    - docker tag "$CI_REGISTRY_IMAGE${TAG}" "$CI_REGISTRY_IMAGE$TAG"
-    - docker push "$CI_REGISTRY_IMAGE$LABEL}"
-    - docker push "$CI_REGISTRY_IMAGE$TAG}"
+    - docker build --pull -t "$CI_REGISTRY_IMAGE:${TAG}" .
+    - docker tag "$CI_REGISTRY_IMAGE:${TAG}" "$CI_REGISTRY_IMAGE:$LABEL"
+    - docker tag "$CI_REGISTRY_IMAGE:${TAG}" "$CI_REGISTRY_IMAGE:$TAG"
+    - docker push "$CI_REGISTRY_IMAGE:$LABEL"
+    - docker push "$CI_REGISTRY_IMAGE:$TAG"
   needs:
     - job: get_version
       artifacts: true
