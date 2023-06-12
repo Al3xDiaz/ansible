@@ -52,8 +52,8 @@ docker-build:
     - docker build --pull -t "$CI_REGISTRY_IMAGE${TAG}" .
     - docker tag "$CI_REGISTRY_IMAGE${TAG}" "$CI_REGISTRY_IMAGE$LABEL"
     - docker tag "$CI_REGISTRY_IMAGE${TAG}" "$CI_REGISTRY_IMAGE$TAG"
-    - docker push "$CI_REGISTRY_IMAGE:$LABEL}"
-    - docker push "$CI_REGISTRY_IMAGE:$TAG}"
+    - docker push "$CI_REGISTRY_IMAGE$LABEL}"
+    - docker push "$CI_REGISTRY_IMAGE$TAG}"
   needs:
     - job: get_version
       artifacts: true
