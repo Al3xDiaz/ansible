@@ -24,8 +24,8 @@ get_version:
   script:
     - /tools/dotnet-gitversion /nocache /nofetch /showvariable MajorMinorPatch > version.txt
     - /tools/dotnet-gitversion /nocache /nofetch /showvariable FullSemVer > fullSemVer.txt
-    - cat version.txt
-    - cat fullSemVer.txt
+    - /tools/dotnet-gitversion /nocache /nofetch /showvariable PreReleaseLabel > preReleaseLabel.txt
+    - cat *.txt
   cache:
     key: ${CI_COMMIT_BRANCH}
     untracked: true
@@ -38,60 +38,28 @@ docker-build:
   stage: build
   services:
     - docker:dind
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
   script:
     - docker build -t "ansible" .
+    - | 
+      if [[ $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH ]]; then
+        TAG=$(cat version.txt)
+        LABEL=latest
+      else
+        TAG=$(cat fullSemVer.txt)
+        LABEL=$(cat preReleaseLabel.txt)
+      fi
+    - docker tag "ansible" "$CI_REGISTRY_IMAGE:$LABEL"
+    - docker tag "ansible" "$CI_REGISTRY_IMAGE:$TAG"
+    - docker push "$CI_REGISTRY_IMAGE:$LABEL}"
+    - docker push "$CI_REGISTRY_IMAGE:$TAG}"
   cache:
     key: ${CI_COMMIT_BRANCH}
-    paths:
-      - "/var/lib/docker/"
   only:
     refs:
       - main
       - dev
-.docker-push:
-  image: docker:latest
-  services:
-    - docker:dind
-  before_script:
-    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
-  script:
-    - cat version.txt > version
-  after_script:
-    - TAG=${TAG:-$(cat version)}
-    - docker images ls
-    - docker tag "ansible" "$CI_REGISTRY_IMAGE:$TAG"
-    - docker push "$CI_REGISTRY_IMAGE:$TAG}"
-  cache:
-    key: ${CI_COMMIT_BRANCH}
-    paths:
-      - "/var/lib/docker/"
-  only:
-    - main
-    - master
-
-push_latest:
-  extends: .docker-push
-  stage: push
-  variables:
-    TAG: latest
-  only:
-    refs:
-      - main
-push_version:
-  extends: .docker-push
-  stage: push
-  only:
-    refs:
-      - main
-push_fullsemver:
-  extends: .docker-push
-  stage: push
-  script:
-    - cat fullSemVer.txt > version
-  except:
-    refs:
-      - main
-
 config:
   stage: config
   needs:
