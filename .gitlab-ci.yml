@@ -34,7 +34,7 @@ get_version:
       - main
       - dev
 docker-build:
-  image: docker:latest
+  image: docker:24.0.2-alpine3.18
   stage: build
   services:
     - docker:dind
@@ -50,6 +50,7 @@ docker-build:
         TAG=$(cat fullSemVer.txt)
         LABEL=$(cat preReleaseLabel.txt)
       fi
+    - echo "$CI_REGISTRY_IMAGE:$LABEL"
     - docker tag "ansible" "$CI_REGISTRY_IMAGE:$LABEL"
     - docker tag "ansible" "$CI_REGISTRY_IMAGE:$TAG"
     - docker push "$CI_REGISTRY_IMAGE:$LABEL}"
