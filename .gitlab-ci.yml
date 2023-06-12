@@ -27,7 +27,7 @@ get_version:
     - /tools/dotnet-gitversion /nocache /nofetch /showvariable PreReleaseLabel > preReleaseLabel.txt
     - cat *.txt
   cache:
-    key: ${CI_COMMIT_BRANCH}
+    key: ${CI_JOB_ID}
     untracked: true
   only:
     refs:
@@ -55,7 +55,8 @@ docker-build:
     - docker push "$CI_REGISTRY_IMAGE:$LABEL}"
     - docker push "$CI_REGISTRY_IMAGE:$TAG}"
   cache:
-    key: ${CI_COMMIT_BRANCH}
+    key: ${CI_JOB_ID}
+    untracked: true
   only:
     refs:
       - main
