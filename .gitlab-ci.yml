@@ -41,19 +41,19 @@ docker-build:
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
   script:
-    - docker build -t "ansible" .
+    - docker build -t "$CI_REGISTRY_IMAGE" .
     - | 
       if [[ $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH ]]; then
         TAG=$(cat version.txt)
+        LABEL=latest
       else
         TAG=$(cat fullSemVer.txt)
-        LABEL=":$(cat preReleaseLabel.txt)"
+        LABEL=$(cat preReleaseLabel.txt)
       fi
-    - echo "$CI_REGISTRY_IMAGE:$LABEL"
-    - docker tag "ansible" "$CI_REGISTRY_IMAGE$LABEL"
-    - docker tag "ansible" "$CI_REGISTRY_IMAGE:$TAG"
-    - docker push "$CI_REGISTRY_IMAGE:$TAG}"
+    - docker tag "$CI_REGISTRY_IMAGE" "$CI_REGISTRY_IMAGE:$LABEL"
+    - docker tag "$CI_REGISTRY_IMAGE" "$CI_REGISTRY_IMAGE:$TAG"
     - docker push "$CI_REGISTRY_IMAGE:$LABEL}"
+    - docker push "$CI_REGISTRY_IMAGE:$TAG}"
   needs:
     - job: get_version
       artifacts: true
