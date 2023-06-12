@@ -63,8 +63,7 @@ docker-build:
 config:
   stage: config
   needs:
-    - job: push_latest
-      optional: true
+    - job: docker-build
   image: 
     name: $CI_REGISTRY_IMAGE:latest
     entrypoint: [""]
