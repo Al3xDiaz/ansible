@@ -94,10 +94,11 @@ if [[  "$TERM_PROGRAM" != "vscode" ]]; then
     neofetch
 fi
 export IP_HOST=`ipv4`
-if [[ -d .git/ ]]; then
-    export git_remote=`git remote`
-    export git_branch=`git branch --show-current`
-    PS1="${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@$IP_HOST\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\] \e[0;34m[\[$git_branch\]] v$(gversion)\n\e[m↳$ "
-else
-    PS1="${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@$IP_HOST\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\n↳$ "
-fi
+export PS1="\[\033[01;34m\]\w\[\033[00m\] "
+# if [[ -d .git/ ]]; then
+#     export git_remote=`git remote`
+#     export git_branch=`git branch --show-current`
+#     PS1="${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@$IP_HOST\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\] \e[0;34m[\[$git_branch\]] v$(gversion)\n\e[m↳$ "
+# else
+#     PS1="${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@$IP_HOST\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\n↳$ "
+# fi

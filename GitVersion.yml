@@ -1,18 +1,19 @@
-mode: mainline
+---
 branches:
-  master:
-    regex: ^ma(ster|in)$
-    tag: 'alpha'
   develop:
     regex: ^dev(elop)?(ment)?$
-    tag: 'beta'
+    tag: beta
+  master:
+    regex: ^ma(ster|in)$
+    tag: alpha
   pull-request:
     regex: ^(pull|pull\-requests|pr)[\-/_].*$
-    tag: 'prerelease'
+    tag: prerelease
+commit-message-incrementing: Enabled
 ignore:
   sha: []
+major-version-bump-message: \[(breaking|major)\]\s?.*
 merge-message-formats: {}
-major-version-bump-message: '\[(breaking|major)\]\s?.*'
-minor-version-bump-message: '\[(feat|feature|minor)\]\s?.*'
-patch-version-bump-message: '\[(fix|patch)\]\s?.*'
-commit-message-incrementing: Enabled
+minor-version-bump-message: \[(feat|feature|minor)\]\s?.*
+mode: mainline
+patch-version-bump-message: \[(fix|patch)\]\s?.*
