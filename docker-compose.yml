@@ -1,15 +1,18 @@
-version: '3.9'
 services:
   ansible:
+    build:
+      context: .
+      dockerfile: dockerfile
+    command: ./ansible-test.sh
     extra_hosts:
-      - "host-machine-1:$IP_HOST"
-      - "host-machine-2:$IP_HOST"
+      - host-machine-1:$IP_HOST
+      - host-machine-2:$IP_HOST
     image: registry.gitlab.com/al3xdiaz/ansible:latest
-    volumes:  
+    volumes:
       - ~/container_home:/root/.ssh/
       - ~/.ssh/:/home/user_keys
       - ./:/root/ansible/
       - ansible_home:/root/
-    command: ./ansible-test.sh
+version: '3.9'
 volumes:
-  ansible_home:
+  ansible_home: null

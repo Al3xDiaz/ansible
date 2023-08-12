@@ -1,47 +1,26 @@
 ---
-workflow:
-  rules:
-    - if: $CI_COMMIT_BRANCH =~ /^main|master$/
-      when: always
-    - if: $CI_COMMIT_BRANCH =~ /^dev(elop)?(ment)??$/
-      when: always
-    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /^dev(elop)?(ment)??$/
-      when: always
-stages:
-  - version
-  - build
-  - push
-  - config
-get_version:
-  image: 
-    name: gittools/gitversion:5.12.0-alpine.3.14-6.0
+config:
+  image:
     entrypoint: [""]
-  variables:
-    GIT_STRATEGY: fetch
-    GIT_DEPTH: 0
-    IGNORE_NORMALISATION_GIT_HEAD_MOVE: 1
-  stage: version
+    name: $CI_REGISTRY_IMAGE:latest
+  needs:
+    - job: docker-build
   script:
-    - /tools/dotnet-gitversion /nocache /nofetch /showvariable MajorMinorPatch > version.txt
-    - /tools/dotnet-gitversion /nocache /nofetch /showvariable FullSemVer > fullSemVer.txt
-    - /tools/dotnet-gitversion /nocache /nofetch /showvariable PreReleaseLabel > preReleaseLabel.txt
-    - cat *.txt
-  artifacts:
-    paths:
-      - "*.txt"
+    - echo hello
+  stage: config
+docker-build:
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+  image: docker:24.0.2-alpine3.18
+  needs:
+    - artifacts: true
+      job: get_version
   only:
     refs:
       - main
       - dev
-docker-build:
-  image: docker:24.0.2-alpine3.18
-  stage: build
-  services:
-    - docker:dind
-  before_script:
-    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
   script:
-    - | 
+    - |
       if [[ $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH ]]; then
         TAG=$(cat version.txt)
         LABEL="latest"
@@ -54,20 +33,40 @@ docker-build:
     - docker tag "$CI_REGISTRY_IMAGE:${TAG}" "$CI_REGISTRY_IMAGE:$TAG"
     - docker push "$CI_REGISTRY_IMAGE:$LABEL"
     - docker push "$CI_REGISTRY_IMAGE:$TAG"
-  needs:
-    - job: get_version
-      artifacts: true
+  services:
+    - docker:dind
+  stage: build
+get_version:
+  artifacts:
+    paths:
+      - '*.txt'
+  image:
+    entrypoint: [""]
+    name: gittools/gitversion:5.12.0-alpine.3.14-6.0
   only:
     refs:
       - main
       - dev
-config:
-  stage: config
-  needs:
-    - job: docker-build
-  image: 
-    name: $CI_REGISTRY_IMAGE:latest
-    entrypoint: [""]
   script:
-    - "echo hello"
-...
+    - /tools/dotnet-gitversion /nocache /nofetch /showvariable MajorMinorPatch > version.txt
+    - /tools/dotnet-gitversion /nocache /nofetch /showvariable FullSemVer > fullSemVer.txt
+    - /tools/dotnet-gitversion /nocache /nofetch /showvariable PreReleaseLabel > preReleaseLabel.txt
+    - cat *.txt
+  stage: version
+  variables:
+    GIT_DEPTH: 0
+    GIT_STRATEGY: fetch
+    IGNORE_NORMALISATION_GIT_HEAD_MOVE: 1
+stages:
+  - version
+  - build
+  - push
+  - config
+workflow:
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^main|master$/
+      when: always
+    - if: $CI_COMMIT_BRANCH =~ /^dev(elop)?(ment)??$/
+      when: always
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /^dev(elop)?(ment)??$/
+      when: always
