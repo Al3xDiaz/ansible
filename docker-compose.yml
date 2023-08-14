@@ -7,7 +7,7 @@ services:
     extra_hosts:
       - host-machine-1:$IP_HOST
       - host-machine-2:$IP_HOST
-    image: registry.gitlab.com/al3xdiaz/ansible:latest
+    image: registry.gitlab.com/chaoticteam/ansible
     volumes:
       - ~/container_home:/root/.ssh/
       - ~/.ssh/:/home/user_keys
