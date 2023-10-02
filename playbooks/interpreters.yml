@@ -29,8 +29,9 @@
     tags:
       - golang
     shell: |
-      rm -rf /usr/lib/go-1.6/ /usr/lib/go-1.6/src/ /usr/lib/go-1.6/src/runtime/ /usr/lib/go-1.6/src/runtime/race
-      export GO_VERSION=$(curl -s https://go.dev/VERSION?m=text)
+      rm -rf /usr/lib/go-1.6/ /usr/lib/go-1.6/src/ /usr/lib/go-1.6/src/runtime/ /usr/lib/go-1.6/src/runtime/race || true
+      export GO_VERSION=$(curl -s https://go.dev/VERSION?m=text | grep go) 
+      
       wget https://dl.google.com/go/$GO_VERSION.linux-amd64.tar.gz
       tar xvf $GO_VERSION.linux-amd64.tar.gz -C /usr/local/
       rm $GO_VERSION.linux-amd64.tar.gz
@@ -39,13 +40,14 @@
     register: go_install
   
   - name: "add go_path to path global"
-    when: go_install.changed
     tags:
       - golang
-    shell: |
-        echo "#go path by user
-        export GOPATH=\$HOME/go
-        export GOBIN=\$GOPATH/bin
+    ansible.builtin.blockinfile:
+      path: /home/{{ ansible_user }}/.bashrc
+      block: |
+        #go path by user
+        export GOPATH=$HOME/go
+        export GOBIN=$GOPATH/bin
         export GOROOT=/usr/local/go
-        export PATH=\$PATH:\$GOBIN:\$GOROOT/bin" >> /{{ ansible_user_id }}/.bashrc
+        export PATH=$PATH:$GOBIN:$GOROOT/bin
 ...

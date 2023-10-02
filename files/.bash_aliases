@@ -36,7 +36,7 @@ gcommit() {
     rm -rf .git/index.lock
     git add --all && git commit -m "$*"
     [[ ${PUSH^} != "N" ]] && echo "will push $COMMITS commit(s)" && git push $git_remote $git_branch
-    gitversion /nocache /nofetch /showvariable MajorMinorPatch || git tag | tail -1
+    [[ -f  GitVersion.yml ]] && gitversion /nocache /nofetch /showvariable MajorMinorPatch || git tag | tail -1
 }
 greset() {
     git reset --hard HEAD~$1
