@@ -82,18 +82,7 @@
     ansible.builtin.blockinfile:
       path: ~/.bashrc
       block: |
-        export LANGUAGE=en_US.UTF-8
-        if [ -f .env ]&&[ ! -f /tmp/load ]; then
-            read -p "Load .env file? [Y/n] " load
-            echo $load > /tmp/load
-        fi
-        load=$(echo /tmp/load)
-        if [ "${load^}" != "N" ]; then
-            set -o allexport
-            source .env
-            set +o allexport
-        fi
-        # source <(kubectl completion bash)
+        source <(kubectl completion bash)
   - name: latte dock shortcuts
     ansible.builtin.blockinfile:
       path: ~/.config/kwinrc

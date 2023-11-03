@@ -93,6 +93,11 @@ ipv4(){
 if [[  "$TERM_PROGRAM" != "vscode" ]]; then
     neofetch
 fi
+loadenvs(){
+    set -o allexport
+    source .env
+    set +o allexport
+}
 export IP_HOST=`ipv4`
 export PS1="\[\033[01;34m\]\w\[\033[00m\] "
 # if [[ -d .git/ ]]; then

@@ -24,6 +24,12 @@ ANSIBLE_VAULT_PASSWORD_FILE=.vault_pass.txt
 ansible-vault decrypt inventory
 ```
 
+```bash
+# ansible desencrypt inventory
+ANSIBLE_VAULT_PASSWORD_FILE=.vault_pass.txt
+ansible-vault encrypt inventory
+```
+
 ## Build image
 
 ```bash
