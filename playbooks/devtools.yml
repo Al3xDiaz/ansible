@@ -34,7 +34,7 @@
         - neofetch
     when:
       - ansible_os_family == "Debian"
-  - name: install gitversion 
+  - name: install gitversion
     when: ansible_os_family == "Debian"
     shell: |
       wget -o /tmp/gitversion.tar.gz https://github.com/GitTools/GitVersion/releases/download/5.12.0/gitversion-linux-arm64-5.12.0.tar.gz
@@ -65,14 +65,19 @@
       apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 5E3C45D7B312C643
       apt-get update &&  apt-get install spotify-client -y
     args:
-      creates: /usr/bin/spotify 
+      creates: /usr/bin/spotify
 
 #chrome
   - name: "install chrome"
     when: ansible_os_family == "Debian"
     apt:
       deb: https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
- 
+
+  - name: "install discord"
+    when: ansible_os_family == "Debian"
+    apt:
+      deb: https://discord.com/api/download?platform=linux&format=deb
+
 #postman
   - name: "downland postman & extract postman"
     when: ansible_os_family == "Debian"
@@ -88,8 +93,8 @@
     when: ansible_os_family == "Debian"
     ansible.builtin.lineinfile:
       path: ~/.bashrc
-      regexp: "^export.*Postman"      
-      line: 'export PATH="$PATH:/usr/bin/Postman"' 
+      regexp: "^export.*Postman"
+      line: 'export PATH="$PATH:/usr/bin/Postman"'
       create: true
       state: present
     become: false
@@ -106,10 +111,10 @@
     args:
       creates: /usr/share/applications/Postman.desktop
     register: postman_desktop_access
- 
+
   - name: Remove the installer
     when: postman_desktop_access.changed
-    file: 
+    file:
       path: /tmp/linux64
       state: absent
 
@@ -120,7 +125,7 @@
       apt-get install -y nodejs
     args:
       creates: /usr/bin/node
-  
+
   #mysql
   - name: change mysql config
     when: ansible_os_family == "Debian"
