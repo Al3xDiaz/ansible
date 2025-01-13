@@ -1,0 +1,63 @@
+---
+- name: Copy using inline content
+  become: false
+  ansible.builtin.blockinfile:
+    path: ~/.ssh/config
+    mode: u+rw,g-rwx,o-rwx
+    block: |
+      Host github
+          User git
+          HostName github.com
+      Host gitlab
+          User git
+          HostName gitlab.com
+      Host *
+          AddKeysToAgent yes
+          PreferredAuthentications publickey,password
+          IdentityFile ~/.ssh/id_{{ git_name }}
+- name: Generate GPG key
+  become: false
+  ansible.builtin.shell: |
+    gpg --batch --gen-key <<EOF
+    Key-Type: 1
+    Key-Length: 4086
+    Subkey-Type: 1
+    Subkey-Length: 2048
+    Name-Real: {{ git_name }}
+    Name-Email: {{ git_email }}
+    Passphrase: {{ server_gpg_passphrasse }}
+    Expire-Date: 1y
+    EOF
+    mkdir -p ~/.gpg/
+    gpg --armor --export {{ git_email }} > ~/.gpg/public_key_{{ git_name }}.txt
+  args:
+    creates: ~/.gpg/public_key_{{ git_name }}.txt
+- name: Generate ssh key
+  become: false
+  ansible.builtin.user:
+    name: "{{ ansible_user }}"
+    generate_ssh_key: true
+    ssh_key_bits: 3072
+    ssh_key_file: .ssh/id_{{ git_name }}
+    ssh_key_passphrase: "{{ server_ssh_key_passphrasse }}"
+- name: HOME/.bashrc
+  become: false
+  ansible.builtin.blockinfile:
+    path: ~/.bashrc
+    block: |
+      if [ -e ansible/.vault_pass.txt ]
+      then
+        ANSIBLE_VAULT_PASSWORD_FILE=./ansible/.vault_pass.txt
+      fi
+      if [ -e .vault_pass.txt ]
+      then
+        ANSIBLE_VAULT_PASSWORD_FILE=.vault_pass.txt
+      fi
+      source <(kubectl completion bash)
+- name: Aliases
+  become: false
+  ansible.builtin.copy:
+    src: .bash_aliases
+    dest: ~/.bash_aliases
+    mode: u=rw,g=rw,o=r
+    follow: true

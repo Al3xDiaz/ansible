@@ -1,0 +1,9 @@
+---
+- name: Copy SSh Key | copying shh key to remote host
+  ansible.posix.authorized_key:
+    user: "{{ ansible_user }}"
+    state: present
+    key: "{{ lookup('file', item) }}"
+  loop: "{{ lookup('fileglob', '~/.ssh/*', wantlist=True) }}"
+  when: item | regex_findall('.*pub$', multiline=True, ignorecase=True)
+  become: false

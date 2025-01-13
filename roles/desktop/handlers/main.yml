@@ -1,0 +1,5 @@
+---
+- name: Restart qdbus
+  ansible.builtin.command: qdbus org.kde.KWin /KWin reconfigure
+  register: my_output
+  changed_when: my_output.rc != 0

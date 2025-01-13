@@ -1,0 +1,13 @@
+---
+- name: Set vim as default editor
+  # update-alternatives --set editor /usr/bin/vim.basic
+  community.general.alternatives:
+    name: vim
+    link: /usr/bin/vim.basic
+    path: /usr/bin/vim
+- name: Config tmux
+  ansible.builtin.copy:
+    src: .tmux.conf
+    dest: /home/{{ ansible_user_id }}/
+    mode: u=rw,g=rw,o=r
+    follow: true

@@ -1,57 +1,56 @@
 # Desciption of the Ansible playbook
 ---
-- name: install tools interpreters
+- name: Install tools interpreters
   hosts: all
   become: true # true to become root
 
   tasks:
   # update
-  - name: "Update Repository cache"
-    when: ansible_os_family == "Debian"
-    tags:
-      - nodejs
-      - golang
-    apt:
-      update_cache: true
-      cache_valid_time: 3600
-      force_apt_get: true
-  - name: Add Node.js LTS
-    when: ansible_os_family == "Debian"
-    tags:
-      - nodejs
-    shell: |
+    - name: Update Repository cache
+      when: ansible_os_family == "Debian"
+      tags:
+        - nodejs
+        - golang
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+        force_apt_get: true
+    - name: Add Node.js LTS
+      when: ansible_os_family == "Debian"
+      tags:
+        - nodejs
+      ansible.builtin.shell: |
         curl -fsSL https://deb.nodesource.com/setup_lts.x | bash -
         apt install nodejs -y
-    args:
-      creates: /usr/bin/node
-  - name: install typescript
-    shell: |
-      npm install -g typescript
-      npx tsc
-  - name: "install golang"
-    when: ansible_os_family == "Debian"
-    tags:
-      - golang
-    shell: |
-      rm -rf /usr/lib/go-1.6/ /usr/lib/go-1.6/src/ /usr/lib/go-1.6/src/runtime/ /usr/lib/go-1.6/src/runtime/race || true
-      export GO_VERSION=$(curl -s https://go.dev/VERSION?m=text | grep go) 
-      
-      wget https://dl.google.com/go/$GO_VERSION.linux-amd64.tar.gz
-      tar xvf $GO_VERSION.linux-amd64.tar.gz -C /usr/local/
-      rm $GO_VERSION.linux-amd64.tar.gz
-    args:
-      creates: /usr/local/go
-    register: go_install
-  
-  - name: "add go_path to path global"
-    tags:
-      - golang
-    ansible.builtin.blockinfile:
-      path: /home/{{ ansible_user }}/.bashrc
-      block: |
-        #go path by user
-        export GOPATH=$HOME/go
-        export GOBIN=$GOPATH/bin
-        export GOROOT=/usr/local/go
-        export PATH=$PATH:$GOBIN:$GOROOT/bin
-...
+      args:
+        creates: /usr/bin/node
+    - name: Install typescript
+      ansible.builtin.shell: |
+        npm install -g typescript
+        npx tsc
+    - name: Install golang
+      when: ansible_os_family == "Debian"
+      tags:
+        - golang
+      ansible.builtin.shell: |
+        rm -rf /usr/lib/go-1.6/ /usr/lib/go-1.6/src/ /usr/lib/go-1.6/src/runtime/ /usr/lib/go-1.6/src/runtime/race || true
+        export GO_VERSION=$(curl -s https://go.dev/VERSION?m=text | grep go) 
+
+        wget https://dl.google.com/go/$GO_VERSION.linux-amd64.tar.gz
+        tar xvf $GO_VERSION.linux-amd64.tar.gz -C /usr/local/
+        rm $GO_VERSION.linux-amd64.tar.gz
+      args:
+        creates: /usr/local/go
+      register: go_install
+
+    - name: Add go_path to path global
+      tags:
+        - golang
+      ansible.builtin.blockinfile:
+        path: /home/{{ ansible_user }}/.bashrc
+        block: |
+          #go path by user
+          export GOPATH=$HOME/go
+          export GOBIN=$GOPATH/bin
+          export GOROOT=/usr/local/go
+          export PATH=$PATH:$GOBIN:$GOROOT/bin

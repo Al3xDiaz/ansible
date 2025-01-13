@@ -1,13 +1,13 @@
 ---
 - name: Install git
-  apt:
+  ansible.builtin.apt:
     name: git
   when:
     - ansible_facts['distribution'] == "Debian"
-- name: configure git
-  tags: 
+- name: Configure git
+  tags:
     - git
-  shell: |
+  ansible.builtin.shell: |
     git config --global user.email "{{ git_email }}"
     git config --global user.name "{{ git_name }}"
     git config --global user.signinkey {{ git_name }}
@@ -20,7 +20,6 @@
   become_user: "{{ ansible_user_id }}"
   when:
     - ansible_facts['distribution'] == "Debian"
-- name: loop
-  debug: 
+- name: Loop
+  ansible.builtin.debug:
     msg: "git email: {{ git_email }} git name: {{ git_name }}"
-...

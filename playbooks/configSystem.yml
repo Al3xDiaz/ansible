@@ -1,6 +1,5 @@
-# Desciption of the Ansible playbook
 ---
-- name: install tools
+- name: Install tools
   hosts: all
   become: false
 
@@ -9,8 +8,8 @@
       ansible.builtin.apt_repository:
         repo: deb http://ftp.de.debian.org/debian bullseye main non-free
         state: present
-    - name: install bluetooth components
-      apt:
+    - name: Install bluetooth components
+      ansible.builtin.apt:
         pkg:
           - bluez-firmware
           - pulseaudio-module-bluetooth
@@ -18,132 +17,6 @@
           - pavucontrol-qt
       when: ansible_os_family == "Debian"
       register: bluetooth
-    - name: restart pulse audio
-      command: killall pulseaudio
+    - name: Restart pulse audio
+      ansible.builtin.command: killall pulseaudio
       when: bluetooth.changed
-    - name: install tools
-      when: ansible_os_family == "Debian"
-      apt:
-        pkg:
-          - figlet
-    - name: "Config tmux"
-      copy:
-        src: '{{ item }}'
-        dest: '/home/{{ ansible_user_id }}/'
-        mode: u=rw,g=rw,o=r
-        follow: true
-      loop:
-        - /root/ansible/files/.tmux.conf
-    - name: Copy using inline content
-      vars:
-        ssh_config_content: |
-          Host github
-              User git
-              HostName github.com
-          Host gitlab
-              User git
-              HostName gitlab.com
-          Host *
-              AddKeysToAgent yes
-              PreferredAuthentications publickey,password
-              IdentityFile ~/.ssh/id_{{ git_name }}
-      ansible.builtin.copy:
-        content: "{{ ssh_config_content }}"
-        dest: ~/.ssh/config
-        mode: u+rw,g-rwx,o-rwx
-        force: false
-    - name: "generate GPG key"
-      shell: |
-        gpg --batch --gen-key <<EOF
-        Key-Type: 1
-        Key-Length: 4086
-        Subkey-Type: 1
-        Subkey-Length: 2048
-        Name-Real: {{ git_name }}
-        Name-Email: {{ git_email }}
-        Passphrase: {{ server_gpg_passphrasse }}
-        Expire-Date: 1y
-        EOF
-        mkdir -p ~/.gpg/
-        gpg --armor --export {{ git_email }} > ~/.gpg/public_key_{{ git_name }}.txt
-      args:
-        creates: ~/.gpg/public_key_{{ git_name }}.txt
-    - name: git
-      include_tasks: "{{ playbook_dir }}/tasks/git.yml"
-    - name: "generate ssh key"
-      ansible.builtin.user:
-        name: "{{ ansible_user }}"
-        generate_ssh_key: yes
-        ssh_key_bits: 3072
-        ssh_key_file: ".ssh/id_{{ git_name }}"
-        ssh_key_passphrase: "{{ server_ssh_key_passphrasse }}"
-    - name: HOME/.bashrc
-      tags: bashrc
-      ansible.builtin.blockinfile:
-        path: ~/.bashrc
-        block: |
-          if [ -e ansible/.vault_pass.txt ]
-          then
-            ANSIBLE_VAULT_PASSWORD_FILE=./ansible/.vault_pass.txt
-          fi
-          if [ -e .vault_pass.txt ]
-          then
-            ANSIBLE_VAULT_PASSWORD_FILE=.vault_pass.txt
-          fi
-          source <(kubectl completion bash)
-    - name: latte dock shortcuts
-      ansible.builtin.blockinfile:
-        path: ~/.config/kwinrc
-        block: |
-          [ModifierOnlyShortcuts]
-          Meta=org.kde.lattedock,/Latte,org.kde.LatteDock,activateLauncherMenu
-      register: latte_dock
-    - name: restart qdbus
-      shell: qdbus org.kde.KWin /KWin reconfigure
-      when: latte_dock.changed
-    - name: aliases
-      copy:
-        src: '/root/ansible/files/.bash_aliases'
-        dest: '~/.bash_aliases'
-        mode: u=rw,g=rw,o=r
-        follow: true
-    - name: clean comments in bash_aliases
-      ansible.builtin.lineinfile:
-        path: ~/.bash_aliases
-        regexp: '^(\s+)?(#.*)?$'
-        create: true
-        state: absent
-  #set keyboard shotcuts
-  #note: find schemas in /usr/share/glib-2.0/schemas or:
-  #gsettings list-recursively | egrep "Alt|Shift|Super|Space|Win|Meta|Primary|Control|Ctrl|Tab" | grep org.gnome | awk '{print $1}' | sort -u
-    - name: system shortcuts
-      shell: |
-        #set open file explorer with gsettings
-        gsettings set org.gnome.settings-daemon.plugins.media-keys home "['<Super>e']"
-        #set hide all normal windows with gsettings
-        GSETTINGS_SCHEMA=org.gnome.desktop.wm.keybindings
-        gsettings set $GSETTINGS_SCHEMA show-desktop "['<Super>d']"
-        #set switch aplications with gsettings
-        gsettings set org.gnome.desktop.wm.keybindings switch-applications "['<Alt>Tab']"
-        #set switch group with gsettings
-        set org.gnome.desktop.wm.keybindings switch-group "['<Super>Tab']"
-
-    - name: Register gnome-shell installation status
-      command: which gnome-shell
-      changed_when: false
-      failed_when: false
-      register: gnome_shell_installed
-
-    - name: custom shortcuts
-      shell: |
-        BEGINNING="gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings"
-
-        KEY_PATH="/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings"
-
-        gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "['$KEY_PATH/custom0/']"
-
-        $BEGINNING/custom0/ name "Launch tmux with  x-terminal-emulator"
-        $BEGINNING/custom0/ command ' x-terminal-emulator -e "tmux -L system"'
-        $BEGINNING/custom0/ binding '<Super>grave'
-      when: gnome_shell_installed.stdout.find('gnome') != -1
-...

@@ -1,6 +1,5 @@
 ---
 # test include others playbook
 # args: msg
-- debug:
-    msg: "user is {{ msg }}"
-...
+- ansible.builtin.debug:
+    msg: user is {{ msg }}

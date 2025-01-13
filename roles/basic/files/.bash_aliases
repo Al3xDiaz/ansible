@@ -1,3 +1,8 @@
+
+if [[ -d .git ]] ; then
+    export git_remote=`git remote`
+    export git_branch=`git branch --show-current`
+fi
 alias ll='ls -l'
 alias la='ls -lA'
 alias l='ls -CF'
@@ -24,19 +29,21 @@ password() {
     pbcopy -o
 }
 # git version
-alias gversion="[ -d .git/ ] && (gitversion /nocache /nofetch /showvariable MajorMinorPatch || git tag | tail -1) || echo 'no version'"
+alias gversion="[ -d .git/ ] && echo v\$(gitversion /nocache /nofetch /showvariable MajorMinorPatch || git tag | tail -1) || echo 'no version'"
 # git commands
 alias gsign="git config --global user.signinkey"
-alias newbranch="git checkout -b"
 gcommit() {
-    git branch $git_branch -u "$git_remote/$git_branch"
+    git status | grep -Po "\t(modified:)?.*"
+    git_remote=`git remote`
+    git_branch=`git branch --show-current`
     [[ -f inventory ]] && ansible-vault encrypt inventory --vault-password-file .vault_pass.txt || true
     COMMITS=$((`git cherry -v | wc -l || echo 0` + 1))
     read -p "do you want to push ($COMMITS) commit(s)? (Y/n):" PUSH
     rm -rf .git/index.lock
     git add --all && git commit -m "$*"
-    [[ ${PUSH^} != "N" ]] && echo "will push $COMMITS commit(s)" && git push $git_remote $git_branch
-    [[ -f  GitVersion.yml ]] && gitversion /nocache /nofetch /showvariable MajorMinorPatch || git tag | tail -1
+    [[ ${PUSH^} != "N" ]] && echo "will push $COMMITS commit(s)" && git push -u $git_remote $git_branch
+    [[ -f  GitVersion.yml ]] && export VERSION=`gversion` && echo $VERSION
+    git fetch
 }
 greset() {
     git reset --hard HEAD~$1
@@ -56,54 +63,34 @@ gstash(){
     git stash $@
 }
 # git commits semantic
-# git version x.y.z (major.minor.patch) +patch
-gfix(){
-    gcommit "[fix] $@"
-}
-gbug(){
-    gcommit "[bug] $@"
-}
-gpatch(){
-    gcommit "[patch] $@"
-}
-gupdate(){
-    gcommit "[update] $@"
-}
-# git version x.y.z (major.minor.patch) +minor
-gfeat(){
-    gcommit "[feat] $@"
-}
-gminor(){
-    gcommit "[minor] $@"
-}
+# git version x.y.z (major.minor.patch)
+# +patch
+alias gfix="gcommit \"[fix] $@\""
+alias gbug="gcommit \"[bug] $@\""
+alias gpatch="gcommit \"[patch] $@\""
+alias gupdate="gcommit \"[update] $@\""
+# +minor
+alias gfeat="gcommit \"[feat] $@\""
+alias gminor="gcommit \"[minor] $@\""
+# +major
+alias grefactor="gcommit \"[refactor] $@\""
+alias gbreaking="gcommit \"[breacking] $@\""
+alias gmajor="gcommit \"[major] $@\""
 
-# git version x.y.z (major.minor.patch) +major
-gcrefactor(){
-    gcommit "[refactor] $@"
-}
-gbreaking(){
-    gcommit "[breaking] $@"
-}
-gmajor(){
-    gcommit "[major] $@"
-}
 ipv4(){
     hostname -I | awk '{print $1}'
 }
-if [[  "$TERM_PROGRAM" != "vscode" ]]; then
-    neofetch
-fi
+# if [[  "$TERM_PROGRAM" != "vscode" ]]; then
+#    neofetch
+#else
+export PS1="┌──${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\] \$([[ -d .git ]] && echo \$(git branch --show-current) [\$(gversion)] )\n└$ "
+#fi
 loadenvs(){
     set -o allexport
     source .env
     set +o allexport
 }
 export IP_HOST=`ipv4`
-export PS1="\[\033[01;34m\]\w\[\033[00m\] "
-# if [[ -d .git/ ]]; then
-#     export git_remote=`git remote`
-#     export git_branch=`git branch --show-current`
-#     PS1="${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@$IP_HOST\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\] \e[0;34m[\[$git_branch\]] v$(gversion)\n\e[m↳$ "
-# else
-#     PS1="${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@$IP_HOST\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\n↳$ "
-# fi
+export FLYCTL_INSTALL="/home/al3xdiaz/.fly"
+export PATH="$FLYCTL_INSTALL/bin:$PATH"
+

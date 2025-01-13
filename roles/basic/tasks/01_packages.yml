@@ -1,0 +1,24 @@
+---
+- name: Install dependences
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+    force_apt_get: true
+    pkg:
+      - git
+      - htop
+      - wget
+      - gpg
+      - curl
+      - dbus
+      - less
+      - vim
+      - pip
+      - software-properties-common
+      - gnupg
+      - tmux
+      - xclip
+      - neofetch
+      - tree
+  when:
+    - ansible_os_family == "Debian"

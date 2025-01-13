@@ -1,3 +1,4 @@
+---
 services:
   ansible:
     build:
@@ -13,6 +14,6 @@ services:
       - ~/.ssh/:/home/user_keys
       - ./:/root/ansible/
       - ansible_home:/root/
-version: '3.9'
 volumes:
-  ansible_home: null
+  ansible_home:
+...

@@ -1,0 +1,76 @@
+---
+- name: Aparence | Install psutil
+  ansible.builtin.pip:
+    name: psutil
+- name: Ensure fonts directory
+  ansible.builtin.file:
+    path: "{{ lookup('env', 'HOME') }}/.fonts"
+    state: directory
+    mode: "1664"
+- name: Aparence | Install fonts
+  ansible.builtin.unarchive:
+    src: https://github.com/microsoft/cascadia-code/releases/download/v2111.01/CascadiaCode-2111.01.zip
+    dest: "{{ lookup('env', 'HOME') }}/.fonts"
+    remote_src: true
+    keep_newer: true
+- name: Aparence | Install gnome-shell-extension-installer
+  ansible.builtin.copy:
+    src: https://github.com/brunelli/gnome-shell-extension-installer/raw/master/gnome-shell-extension-installer
+    dest: /usr/bin/gnome-shell-extension-installer
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0774"
+  when: lookup('env', 'DESKTOP_SESSION') == 'gnome'
+- name: Gnome extentions
+  become: false
+  when: lookup('env', 'DESKTOP_SESSION') == 'gnome'
+  ansible.builtin.shell: |
+    gnome-shell-extension-installer 307 # Install "Dash to Dock"
+    gnome-shell-extension-installer 3088 # Install "Extension list"
+  register: gnome_commande_output
+  changed_when: gnome_commande_output.rc != 0
+- name: Latte dock shortcuts
+  ansible.builtin.blockinfile:
+    path: ~/.config/kwinrc
+    block: |
+      [ModifierOnlyShortcuts]
+      Meta=org.kde.lattedock,/Latte,org.kde.LatteDock,activateLauncherMenu
+  notify: Restart qdbus
+  become: false
+- name: Aparence | Configure System shortcut home
+  community.general.dconf:
+    key: /org.gnome.settings-daemon.plugins.media-keys/home
+    state: present
+    value: "['<Super>e']"
+- name: Aparence | Configure System shortcuts (show-desktop, switch-applications & switch-group)
+  community.general.dconf:
+    key: /org.gnome.desktop.wm.keybindings/{{ item.name }}
+    state: present
+    value: "{{ item.value }}"
+  loop:
+    - name: show-desktop
+      value: "['<Super>d']"
+    - name: switch-applications
+      value: "['<Alt>Tab']"
+    - name: switch-group
+      value: "['<Super>Tab']"
+- name: Aparence | Configure Custom shortcuts
+  ansible.builtin.include_tasks: "01.1create_shortcuts.yml"
+  vars:
+    shortcut_info:
+      name: "{{ item.name }}"
+      command: "{{ item.command }}"
+      binding: "{{ item.binding }}"
+    registry_name: custom{{ index }}
+
+  loop:
+    - name: Launch tmux with x-terminal-emulator
+      command: x-terminal-emulator -e "tmux -L system"
+      binding: <Super>grave
+  loop_control:
+    index_var: index
+  tags: [never, users]
+# set keyboard shotcuts
+# note: find schemas in /usr/share/glib-2.0/schemas or:
+# gsettings list-recursively | egrep "Alt|Shift|Super|Space|Win|Meta|Primary|Control|Ctrl|Tab" | grep org.gnome | awk '{print $1}' | sort -u
+...

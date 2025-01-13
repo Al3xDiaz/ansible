@@ -1,0 +1,44 @@
+---
+- name: Install minecraft with tlancher
+  become: false
+  ansible.builtin.unarchive:
+    src: https://tlauncher.org/jar
+    dest: /usr/games/
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "764"
+    remote_src: true
+- name: Create icon application
+  ansible.builtin.copy:
+    src: https://tlauncher.org/favicon.ico
+    dest: /usr/local/share/
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "764"
+    remote_src: true
+- name: Create desktop icon
+  ansible.builtin.copy:
+    dest: /usr/share/applications/Tlauncher.desktop
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: u=rw,g=rw,o=r
+    content: |
+      [Desktop Entry]
+      Name=tlauncher
+      GenericName=Tlauncher
+      Comment=tlancher
+      Exec=java -jar /usr/games/TLauncher*.jar
+      Terminal=false
+      X-MultipleArgs=false
+      Type=Application
+      Icon=~/Descargas/tlancher.jpg
+      StartupWMClass=TLauncher
+      StartupNotify=true
+- name: Create shortcut to screen
+  ansible.builtin.file:
+    src: /usr/share/applications/Tlauncher.desktop
+    dest: /home/{{ ansible_user }}/Escritorio/Tlauncher.desktop
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    state: link
+...

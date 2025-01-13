@@ -1,21 +1,19 @@
 # Desciption of the Ansible playbook
 ---
-- name: install kubeadmin
+- name: Install kubeadmin
   hosts: worker
   become: true
 
   tasks:
-  - name: install k8s node
-    include_tasks: tasks/k8s-nodes.yml
-
-  - name: copy command.sh
-    when: ansible_os_family == "Debian"
-    ansible.builtin.copy:
-      src: /root/ansible/outputs/command.sh
-      dest: /tmp/command.sh
-      owner: "{{ ansible_user_id }}"
-      group: "{{ ansible_user_id }}"
-      mode: u=rw,g=rw,o=r
-  - name: Cluster join command
-    command: sh /tmp/command.sh
-...
+    - name: Install k8s node
+      ansible.builtin.include_tasks: tasks/k8s-nodes.yml
+    - name: Copy command.sh
+      when: ansible_os_family == "Debian"
+      ansible.builtin.copy:
+        src: /root/ansible/outputs/command.sh
+        dest: /tmp/command.sh
+        owner: "{{ ansible_user_id }}"
+        group: "{{ ansible_user_id }}"
+        mode: u=rw,g=rw,o=r
+    - name: Cluster join command
+      ansible.builtin.command: sh /tmp/command.sh

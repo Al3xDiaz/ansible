@@ -39,7 +39,7 @@ docker-build:
 get_version:
   artifacts:
     paths:
-      - '*.txt'
+      - "*.txt"
   image:
     entrypoint: [""]
     name: gittools/gitversion:5.12.0-alpine.3.14-6.0

@@ -1,15 +1,15 @@
 # Desciption of the Ansible playbook
 ---
-- name: install kubeadmin
+- name: Install kubeadmin
   hosts: master
   become: true # true to become root
 
   tasks:
-    - name: include tasks k8s nodes
-      include_tasks: tasks/k8s-nodes.yml
+    - name: Include tasks k8s nodes
+      ansible.builtin.include_tasks: tasks/k8s-nodes.yml
       when: ansible_os_family == "Debian"
     - name: Initialize Kubernetes Cluster
-      shell: |
+      ansible.builtin.shell: |
         kubeadm init --apiserver-advertise-address={{ inventory_hostname }} --pod-network-cidr=192.168.0.0/16  --ignore-preflight-errors=all --v=5
       args:
         creates: /etc/kubernetes/admin.conf
@@ -17,23 +17,23 @@
     - name: Deploy Calico network
       when: output.changed
       register: calico
-      shell: |
+      ansible.builtin.shell: |
         kubectl --kubeconfig=/etc/kubernetes/admin.conf create -f https://docs.projectcalico.org/v3.14/manifests/calico.yaml
     - name: Cluster join command
       when: calico.changed
-      shell: |
+      ansible.builtin.shell: |
         kubeadm token create --print-join-command > /tmp/command.sh
       register: join_command
     - name: Copy join command from master to localhost
       ansible.builtin.fetch:
         src: /tmp/command.sh
         dest: /root/ansible/outputs/command.sh
-        flat: yes
+        flat: true
       when: join_command.changed
     - name: Update
       tags:
         - copy-file
-      shell: |
+      ansible.builtin.shell: |
         mkdir -p /root/global/.kube
         cp -i /etc/kubernetes/admin.conf /root/global/.kube/config
         chown 770 /root/global/.kube/config

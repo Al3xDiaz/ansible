@@ -1,142 +1,23 @@
 # Desciption of the Ansible playbook
 ---
-- name: install tools
+- name: Install tools
   hosts: all
   become: true
   tasks:
-# update
-  - name: "Update Repository cache"
-    tags:
-      - update
-    apt:
-      update_cache: true
-      cache_valid_time: 3600
-      force_apt_get: true
-    when:
-      - ansible_os_family == "Debian"
-#dependences
-  - name: install dependences
-    tags:
-      - allways
-    apt:
-      pkg:
-        - wget
-        - gpg
-        - curl
-        - dbus
-        - less
-        - vim
-        - pip
-        - software-properties-common
-        - gnupg
-        - tmux
-        - xclip
-        - neofetch
-    when:
-      - ansible_os_family == "Debian"
-  - name: install gitversion
-    when: ansible_os_family == "Debian"
-    shell: |
-      wget -o /tmp/gitversion.tar.gz https://github.com/GitTools/GitVersion/releases/download/5.12.0/gitversion-linux-arm64-5.12.0.tar.gz
-      tar -xvf /tmp/gitversion.tar.gz -C /usr/bin
-    args:
-      creates: /usr/bin/gitversion
-#set vim as default editor.
-  - name: set vim as default editor
-    shell: "update-alternatives --set editor /usr/bin/vim.basic"
-#install VS code
-  - name: downland vs code
-    when: ansible_os_family == "Debian"
-    shell: |
-      # wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
-      # install -o root -g root -m 644 packages.microsoft.gpg /etc/apt/trusted.gpg.d/
-      # sh -c 'echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/trusted.gpg.d/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" > /etc/apt/sources.list.d/vscode.list'
-      # rm -f packages.microsoft.gpg
-      # apt update && apt install code -y
-    args:
-      creates: /usr/bin/code
-#install spotify
-  - name: install spotify
-    when: ansible_os_family == "Debian"
-    shell: |
-      apt-get upgrade -y
-      curl -sS https://download.spotify.com/debian/pubkey_5E3C45D7B312C643.gpg | apt-key add - keyserver=hkp://keyserver.ubuntu.com:80 id=931FF8E79F0876134EDDBDCCA87FF9DF48BF1C90 state=present
-      echo "deb http://repository.spotify.com stable non-free" | tee /etc/apt/sources.list.d/spotify.list
-      apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 5E3C45D7B312C643
-      apt-get update &&  apt-get install spotify-client -y
-    args:
-      creates: /usr/bin/spotify
+    #dependences
+    #mysql
+    - name: Change mysql config
+      when: ansible_os_family == "Debian"
+      ansible.builtin.lineinfile:
+        path: /etc/fstab
+        regexp: ^(.*)(remount-ro.*)$
+        line: \1remount-ro,barrier=0 0 1
+        backrefs: true
+      register: mysql_config
 
-#chrome
-  - name: "install chrome"
-    when: ansible_os_family == "Debian"
-    apt:
-      deb: https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-
-  - name: "install discord"
-    when: ansible_os_family == "Debian"
-    apt:
-      deb: https://discord.com/api/download?platform=linux&format=deb
-
-#postman
-  - name: "downland postman & extract postman"
-    when: ansible_os_family == "Debian"
-    shell: |
-      wget https://dl.pstmn.io/download/latest/linux64
-      tar -xvf linux64 -C /usr/bin
-    register: postman
-    args:
-      chdir: /tmp/
-      creates: /usr/bin/Postman/Postman
-
-  - name: "alias postman"
-    when: ansible_os_family == "Debian"
-    ansible.builtin.lineinfile:
-      path: ~/.bashrc
-      regexp: "^export.*Postman"
-      line: 'export PATH="$PATH:/usr/bin/Postman"'
-      create: true
-      state: present
-    become: false
-    become_user: "{{ ansible_user_id }}"
-
-  - name: "create desktop access icon"
-    when: postman.changed
-    ansible.builtin.copy:
-      src: /root/ansible/files/desktop_access/Postman.desktop
-      dest: /usr/share/applications/
-      owner: "{{ ansible_user_id }}"
-      group: "{{ ansible_user_id }}"
-      mode: u=rw,g=rw,o=r
-    args:
-      creates: /usr/share/applications/Postman.desktop
-    register: postman_desktop_access
-
-  - name: Remove the installer
-    when: postman_desktop_access.changed
-    file:
-      path: /tmp/linux64
-      state: absent
-
-  - name: "install node js"
-    when: ansible_os_family == "Debian"
-    shell: |
-      curl -fsSL https://deb.nodesource.com/setup_lts.x | bash -
-      apt-get install -y nodejs
-    args:
-      creates: /usr/bin/node
-
-  #mysql
-  - name: change mysql config
-    when: ansible_os_family == "Debian"
-    ansible.builtin.lineinfile:
-      path: /etc/fstab
-      regexp: '^(.*)(remount-ro.*)$'
-      line: \1remount-ro,barrier=0 0 1
-      backrefs: yes
-    register: mysql_config
-
-  - name: "reboot becouse mysql"
-    shell: "systemctl reboot"
-    when: mysql_config.changed
-...
+    - name: Reboot becouse mysql
+      ansible.builtin.command: systemctl reboot
+      when: lookup('env', 'DESKTOP_SESSION') != plasma
+    - name: Reboot becouse mysql
+      ansible.builtin.command: qdbus org.kde.ksmserver /KSMServer org.kde.KSMServerInterface.logout -1 1 1
+      when: lookup('env', 'DESKTOP_SESSION') == plasma

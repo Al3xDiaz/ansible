@@ -12,7 +12,7 @@ $(hostname -I | awk '{print $1}') ansible_user=$USER server_ssh_key_passphrasse=
 [all:vars]
 ansible_ssh_pass=\"\"
 ansible_sudo_pass=\"\"
-git_name=johndoo 
+git_name=johndoo
 git_email=john@doo.es
 [personal:children]
 localhost" > ./ansible/inventory
@@ -20,13 +20,13 @@ localhost" > ./ansible/inventory
 
 ```bash
 # ansible desencrypt inventory
-ANSIBLE_VAULT_PASSWORD_FILE=.vault_pass.txt
+export ANSIBLE_VAULT_PASSWORD_FILE=.vault_pass.txt
 ansible-vault decrypt inventory
 ```
 
 ```bash
 # ansible desencrypt inventory
-ANSIBLE_VAULT_PASSWORD_FILE=.vault_pass.txt
+export ANSIBLE_VAULT_PASSWORD_FILE=.vault_pass.txt
 ansible-vault encrypt inventory
 ```
 
@@ -57,7 +57,7 @@ docker-compose run  --rm ansible ansible all -m ping
 ```
 
 ```bash
-# Copy identity file 
+# Copy identity file
 # Note: you can replace "node-`hostname -I | awk '{print $1}'`" for your $HOST_NAME or $IP_ADDRESS
 docker-compose run --rm ansible ssh-copy-id -i /root/.ssh/ansible node-`hostname -I | awk '{print $1}'`
 ```
@@ -76,7 +76,8 @@ docker-compose run --rm ansible ansible-playbook playbooks/01_copy_ssh_key.yml
 
 ```bash
 #test
-docker-compose run --rm ansible ansible-playbook playbooks/configSystem.yml --check
+# docker-compose run --rm ansible \
+ansible-playbook Main.yml --tags desktop --check
 ```
 
 ```bash
@@ -134,8 +135,8 @@ docker-compose run --rm ansible ansible-playbook playbooks/testInclude.yml --che
 ```bash
 rm ~/.tmux.*
 rm ~/.bash_aliases
-ln -s `pwd`/files/.tmux.conf ~/.tmux.conf
-ln -s `pwd`/files/.bash_aliases ~/.bash_aliases
+ln -s `pwd`/roles/basic/files/.tmux.conf ~/.tmux.conf
+ln -s `pwd`/roles/basic/files/.bash_aliases ~/.bash_aliases
 tmux new source-file ~/.tmux.conf
 ```
 

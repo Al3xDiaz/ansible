@@ -1,0 +1,26 @@
+---
+- name: Main | playbook
+  become: true
+  hosts: all
+  roles:
+    # - role: basic
+    #   tags:
+    #     - always
+    - role: user
+      tags: [user]
+    # - role: desktop
+    #   tags: [desktop]
+    # - role: server
+    #   tags: [server]
+  # - role: k8s
+  #   tags:
+  #     - devops
+  #     - k8s
+  # - role: frontend
+  #   tags: [frontend]
+  # - role: backend
+  #   tags: [backend]
+  # - role: devops
+  #   tags: [devops]
+  # - role: mobile
+  #   tags: [mobile]

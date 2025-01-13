@@ -1,0 +1,5 @@
+---
+- name: Main | initial_configuration
+  ansible.builtin.include_tasks: "01_packages.yml"
+- name: Main | config profile
+  ansible.builtin.include_tasks: "02_config_profile.yml"

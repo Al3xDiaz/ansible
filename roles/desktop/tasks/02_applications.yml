@@ -1,0 +1,72 @@
+---
+- name: Install gitversion
+  ansible.builtin.unarchive:
+    src: https://github.com/GitTools/GitVersion/releases/download/5.12.0/gitversion-linux-x64-5.12.0.tar.gz
+    dest: /usr/local/bin/
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "764"
+    remote_src: true
+- name: Add an Apt signing key to a specific keyring file
+  ansible.builtin.apt_key:
+    url: https://packages.microsoft.com/keys/microsoft.asc
+    keyring: /etc/apt/trusted.gpg.d/packages.microsoft.gpg
+- name: Apt install visual studio code
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+    force_apt_get: true
+    name:
+      - code
+- name: Add an Apt signing key to a specific keyring file
+  ansible.builtin.apt_key:
+    id: 931FF8E79F0876134EDDBDCCA87FF9DF48BF1C90
+    url: https://download.spotify.com/debian/pubkey_5E3C45D7B312C643.gpg
+    keyring: /etc/apt/trusted.gpg.d/spotify.gpg
+- name: Apt install visual studio code
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+    force_apt_get: true
+    name:
+      - spotify-client
+- name: Install chrome
+  when: ansible_os_family == "Debian"
+  ansible.builtin.apt:
+    deb: https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+
+- name: Install discord
+  when: ansible_os_family == "Debian"
+  ansible.builtin.apt:
+    deb: https://discord.com/api/download?platform=linux&format=deb
+
+- name: Unarchive postman files
+  ansible.builtin.unarchive:
+    src: https://dl.pstmn.io/download/latest/linux64
+    dest: /usr/local/bin/
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "764"
+    remote_src: true
+- name: Alias postman
+  ansible.builtin.lineinfile:
+    path: ~/.bashrc
+    regexp: ^export.*Postman
+    line: export PATH="$PATH:/usr/bin/Postman"
+    create: true
+    state: present
+    mode: u=rw,g=rw,o=r
+
+- name: Create desktop access icon
+  ansible.builtin.copy:
+    src: Postman.desktop
+    dest: /usr/share/applications/
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: u=rw,g=rw,o=r
+
+- name: Install megasycn
+  when: ansible_os_family == "Debian"
+  ansible.builtin.apt:
+    deb: https://mega.nz/linux/repo/Debian_11/amd64/megasync-Debian_11_amd64.deb
+...

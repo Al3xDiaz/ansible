@@ -1,38 +1,37 @@
 ---
 - name: Kubernetes Setup
   when: ansible_distribution == "Debian"
-  shell: 
-  - |
-    ufw disable
-    swapoff -a; sed -i '/swap/d' /etc/fstab
-    cat >>/etc/sysctl.d/kubernetes.conf<<EOF
-    net.bridge.bridge-nf-call-ip6tables = 1
-    net.bridge.bridge-nf-call-iptables = 1
-    EOF
-    sysctl --system
+  shell:
+    - |
+      ufw disable
+      swapoff -a; sed -i '/swap/d' /etc/fstab
+      cat >>/etc/sysctl.d/kubernetes.conf<<EOF
+      net.bridge.bridge-nf-call-ip6tables = 1
+      net.bridge.bridge-nf-call-iptables = 1
+      EOF
+      sysctl --system
   args:
     creates: /etc/sysctl.d/kubernetes.conf
 - name: Add Apt repository
   when: ansible_distribution == "Debian"
-  shell: 
-  - |
-    curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
-    echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list
+  shell:
+    - |
+      curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+      echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list
   args:
     creates: /etc/apt/sources.list.d/kubernetes.list
-- name: "Update Repository cache"
+- name: Update Repository cache
   when: ansible_distribution == "Debian"
-  apt:
+  ansible.builtin.apt:
     update_cache: true
     cache_valid_time: 3600
     force_apt_get: true
-    
+
 - name: install packages needed to use the Kubernetes
   when: ansible_distribution == "Debian"
-  shell: 
-  - |
-    apt update
-    apt install -y kubeadm=1.18.5-00 kubelet=1.18.5-00 kubectl=1.18.5-00
+  shell:
+    - |
+      apt update
+      apt install -y kubeadm=1.18.5-00 kubelet=1.18.5-00 kubectl=1.18.5-00
   args:
     creates: /usr/bin/kubeadm
-...

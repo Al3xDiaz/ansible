@@ -1,0 +1,10 @@
+---
+- name: Config dconf registry
+  community.general.dconf:
+    key: /org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/{{ registry_name }}/{{ data.key }}
+    state: present
+    value: "{{ data.value }}"
+  loop: "{{ shortcut_info | dict2items }}"
+  loop_control:
+    loop_var: data
+...
